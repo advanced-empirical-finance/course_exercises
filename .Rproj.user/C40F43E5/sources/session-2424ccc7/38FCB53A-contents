@@ -1,0 +1,20 @@
+project:
+  type: website
+
+website:
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - section: "Introduction"
+        contents:
+          - index.qmd
+          - introduction.qmd
+      - section: "Financial Data"
+        contents:
+          - financial_data.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true

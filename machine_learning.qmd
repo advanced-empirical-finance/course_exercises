@@ -1,0 +1,187 @@
+---
+title: "Machine Learning 1: Shrinkage Estimation"
+---
+
+<!-- In these exercises, you familiarize yourself with the details behind shrinkage regression methods such as Ridge and Lasso. Although *R* and *Python* provide amazing interfaces which perform the estimation flawlessly, you are first asked to implement Ridge and Lasso regression estimators from scratch before moving on to using the package *glmnet* next.  -->
+
+<!-- ## Introduction to penalized regressions  -->
+
+<!-- **Exercises:** -->
+
+<!-- - Load the file `macro_predictors` from the `tidy_finance_*.sqlite`database. Create a variable `y`that contains the market excess returns from the Goyal-Welsh dataset (`rp_div`) and a matrix `X` that contains the remaining macroeconomic variables except for the column `month`. You will use `X` and `y` to perform penalized regressions. Try to run a simple linear regression of `X` on `y´ to analyze the relationship between the macroeconomic variables and market returns. Which problems do you encounter? -->
+<!-- - Write a function that requires three inputs, `y` (a $T$ vector), `X` (a $(T \times K)$ matrix), and `lambda` and which returns the **Ridge** estimator (a $K$ vector) for given penalization parameter $\lambda$. Recall that the intercept should not be penalized. Therefore, your function should allow you to indicate whether $X$ contains a vector of ones as the first column which should be exempt from the $L_2$ penalty. -->
+<!-- - Compute the $L_2$ norm ($\beta'\beta$) for the regression coefficients based on the predictive regression from the previous exercise for a range of $\lambda$'s and illustrate the effect of the penalization in a suitable figure. -->
+<!-- - Now, write a function that requires three inputs, `y` (a $T$ vector), `X` (a $(T \times K)$ matrix), and 'lambda` and which returns the **Lasso** estimator (a $K$ vector) for given penalization parameter $\lambda$. Recall that the intercept should not be penalized. Therefore, your function should allow you to indicate whether $X$ contains a vector of ones as the first column which should be exempt from the $L_1$ penalty. -->
+<!-- - After you are sure you understand what Ridge and Lasso regression are doing, familiarize yourself with the documentation of the package `glmnet()`. It is a thoroughly tested and well-established package that provides efficient code to compute the penalized regression coefficients not only for Ridge and Lasso but also for combinations, therefore, commonly called *elastic nets*.  -->
+
+<!-- **Solutions: ** -->
+
+<!-- ```{r} -->
+<!-- # Load required packages -->
+<!-- library(RSQLite) -->
+<!-- library(tidyverse) -->
+
+<!-- # Read in the data -->
+<!-- tidy_finance <- dbConnect(SQLite(), -->
+<!--   "../data/tidy_finance.sqlite", -->
+<!--   extended_types = TRUE -->
+<!-- ) -->
+
+<!-- macro_predictors <- tbl(tidy_finance, "macro_predictors") |> -->
+<!--   collect() -->
+
+<!-- y <- macro_predictors$rp_div -->
+<!-- X <- macro_predictors |> -->
+<!--   select(-month, -rp_div) |> -->
+<!--   as.matrix() -->
+
+<!-- # OLS for Welsh data fails because X is not of full rank -->
+<!-- c(ncol(X), Matrix::rankMatrix(X)) -->
+<!-- ``` -->
+
+<!-- As for OLS, the objective function is to minimize the sum of squared errors $(y - X\beta)'(y - X\beta)$ under the condition that $\sum\limits_{j=2}^K \beta_j \leq t(\lambda)$ **if** an intercept is present. This can be rewritten as $\beta'A\beta \leq t(\lambda)$ where $A = \begin{pmatrix}0&&\ldots&&0\\\vdots& 1&0&\ldots&0\\&\vdots&\ddots&&0\\0& &\ldots&&1\end{pmatrix}$. Otherwise, the condition is simply that $\beta'I_K\beta \leq t(\lambda)$ where $I_k$ is an identity matrix of size ($k \times k$).  -->
+<!-- ```{r} -->
+<!-- ridge_regression <- function(y, X, lambda = 0, intercept = FALSE) { -->
+<!--   K <- ncol(X) -->
+<!--   A <- diag(K) -->
+<!--   if (intercept) { -->
+<!--     A[1, ] <- 0 -->
+<!--   } -->
+<!--   coeffs <- solve(t(X) %*% X + lambda * A) %*% t(X) %*% y -->
+<!--   return(coeffs) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- Below, I apply the function to the data set from the previous exercise to illustrate the output of the function `ridge_regression()`.   -->
+<!-- ```{r}  -->
+<!-- rc <- c(NA, ridge_regression(y, X, lambda = 1)) -->
+
+<!-- # Add an intercept term -->
+<!-- rc_i <- ridge_regression(y, cbind(1, X), lambda = 1, intercept = TRUE) -->
+<!-- cbind(rc, rc_i) -->
+<!-- ``` -->
+
+<!-- Finally, the following code sequence computes the $L_2$ norm of the ridge regression coefficients for a given $\lambda$. Note that to implement this evaluation in a tidy manner, vectorized functions are important! `R` provides great ways to vectorize a function, to learn more, Hadley Wickham's book [Advanced R](https://adv-r.hadley.nz/) is a highly recommended read! -->
+
+<!-- ```{r} -->
+
+<!-- l2_norm <- function(lambda) sum(ridge_regression(y = y, X = X, lambda = lambda)^2) # small helper function to extract the L_2 norm of the ridge regression coefficients -->
+
+<!-- l2_norm <- Vectorize(l2_norm) # To use the function within a `mutate` operation, it needs to be vectorized -->
+
+<!-- seq(from = 0.01, to = 20, by = 0.1) |> -->
+<!--   as_tibble() |> -->
+<!--   mutate(norm = l2_norm(value)) |> -->
+<!--   ggplot(aes(x = value, y = norm)) + -->
+<!--   geom_line() + -->
+<!--   labs(x = "Lambda", y = " L2 norm") -->
+<!-- ``` -->
+
+<!-- To compute the coefficients of linear regression with a penalty on the sum of the absolute value of the regression coefficients, numerical optimization routines are required. Recall, the objective function is to minimize the sum of squared residuals, $\hat\varepsilon'\hat\varepsilon$ under the constraint that $\sum\limits_{j=2}^K\beta_j\leq t(\lambda)$. Make sure you familiarize yourself with the way, numerical optimization in R works: we first define the objective function (`objective_lasso()`) which has the parameter we aim to optimize as its first argument. The main function `lasso_regression()` then only calls this helper function.  -->
+<!-- ```{r} -->
+<!-- objective_lasso <- function(beta, y, X, lambda, intercept) { -->
+<!--   residuals <- y - X %*% beta -->
+<!--   sse <- sum(residuals^2) -->
+<!--   penalty <- sum(abs(beta)) -->
+<!--   if (intercept) { -->
+<!--     penalty <- penalty - abs(beta[1]) -->
+<!--   } -->
+<!--   return(sse + lambda * penalty) -->
+<!-- } -->
+
+<!-- lasso_regression <- function(y, X, lambda = 0, intercept = FALSE) { -->
+<!--   K <- ncol(X) -->
+<!--   beta_init <- rep(0, K) -->
+<!--   return(optim(par = beta_init, fn = objective_lasso, y = y, X = X, lambda = lambda, intercept = intercept)$par) -->
+<!-- } -->
+
+<!-- rc <- c(NA, lasso_regression(y, X, lambda = 0.01)) -->
+
+<!-- # Add an intercept term -->
+<!-- rc_i <- lasso_regression(y, cbind(1, X), lambda = 0.01, intercept = TRUE) -->
+<!-- cbind(rc, rc_i) -->
+<!-- ``` -->
+<!-- Finally, as in the previous example with Ridge regression, I illustrate how a larger penalization term $\lambda$ affects the $L_1$ norm of the regression coefficients. -->
+<!-- ```{r l1-regression} -->
+
+<!-- l1_norm <- function(lambda) sum(abs(lasso_regression(y = y, X = X, lambda = lambda))) -->
+<!-- l1_norm <- Vectorize(l1_norm) # To use the function within a `mutate` operation, it needs to be vectorized -->
+
+<!-- seq(from = 0, to = 0.5, by = 0.05) |> -->
+<!--   as_tibble() |> -->
+<!--   mutate(norm = l1_norm(value)) |> -->
+<!--   ggplot(aes(x = value, y = norm)) + -->
+<!--   geom_line() + -->
+<!--   labs(x = "Lambda", y = " L1 norm") -->
+<!-- ``` -->
+
+<!-- While the code above should work, there are well-tested R packages available that provide a much more reliable and faster implementation. Thus, you can safely use the package `glmnet`. As a first step, the following code create the sequence of regressions coefficients for the Goyal-Welch dataset which should be identical to the example we discussed in the lecture slides. -->
+
+<!-- ```{r} -->
+<!-- library(glmnet) -->
+<!-- # Lasso and Ridge regression -->
+
+<!-- fit_ridge <- glmnet(X, y, # Model -->
+<!--   alpha = 0 -->
+<!-- ) -->
+
+<!-- broom::tidy(fit_ridge) |> -->
+<!--   filter(term != "(Intercept)") |> -->
+<!--   ggplot(aes(x = lambda, y = estimate, color = term)) + -->
+<!--   geom_line() + -->
+<!--   geom_hline(data = broom::tidy(fit_ridge) |>  -->
+<!--                filter(lambda == min(lambda)),  -->
+<!--              aes(yintercept = estimate, color = term), linetype = "dotted") + -->
+<!--   theme_minimal() + -->
+<!--   scale_x_log10() + -->
+<!--   labs(x = "Lambda", y = "Estimate") -->
+<!-- ``` -->
+
+<!-- Note the function argument `alpha`. `glmnet()` allows a more flexible combination of $L_1$ and $L_2$ penalization on the regression coefficients. The *pure* ridge estimation is implemented with `alpha = 0`, lasso requires `alpha = 1`.  -->
+
+<!-- ```{r} -->
+<!-- fit_lasso <- glmnet(X, y, # Model -->
+<!--   alpha = 1 -->
+<!-- ) -->
+
+<!-- broom::tidy(fit_lasso) |> -->
+<!--   filter(term != "(Intercept)") |> -->
+<!--   ggplot(aes(x = lambda, y = estimate, color = term)) + -->
+<!--   geom_line() + -->
+<!--   geom_hline(data = broom::tidy(fit_ridge) |>  -->
+<!--                filter(lambda == min(lambda)),  -->
+<!--              aes(yintercept = estimate, color = term), linetype = "dotted") + -->
+<!--   theme_minimal() + -->
+<!--   scale_x_log10() + -->
+<!--   labs(x = "Lambda", y = "Estimate") -->
+<!-- ``` -->
+
+<!-- Note in the figure how Lasso discards all variables for high values of $\lambda$ and then gradually incorporates more predictors. It seems like stock variance is selected first. As expected, for $\lambda \rightarrow 0$, the lasso coefficients converge towards the OLS estimates (illustrated with dotted lines).  -->
+
+## Factor selection via machine learning
+
+In this Chapter, you get to know `tidymodels` (R) and `scikit-learn` (Python), a collection of packages for modeling and machine learning (ML) using tidy coding principles. From a finance perspective, you will apply penalized regressions to understand which factors and macroeconomic predictors may help to explain the cross-section of industry returns.  
+
+**Exercises: **
+
+- In this analysis, we use four different data sources. Load the monthly Fama-French 3-factor returns, the monthly q-factor returns from Hou, Xue, and Zhang (2014), the macroeconomic predictors from Welch and Goyal (2008), and monthly portfolio returns from 10 different industries according to the definition from Kenneth French’s homepage as test assets. Your data should contain 22 columns of regressors with 13 macro variables and 8-factor returns for each month.   
+- Provide meaningful summary statistics for the test assets' excess returns.
+
+::: {.panel-tabset group="language"}
+## R
+- Familiarize yourself with the `tidymodels` workflow. First, restrict yourself to just one industry, e.g. `Manufacturing`. Use the function `initial_time_split` from the `rsample` package to split the sample into a training and a test set. 
+- Preprocess the data by creating a `recipe` which performs the following steps: First, the aim is to explain the industry excess returns as a function of all predictors. Exclude the column month from the analysis. Include all interaction terms between factors and macroeconomic predictors. Demean and scale each regressor such that the standard deviation is one.
+- Build a model `linear_reg` with `tidymodels` with a fixed penalty term that performs lasso regression. Create a `workflow` that first applies the recipe steps to the training data and then fits the model. Illustrate the predicted industry returns for the in-sample and the out-of-sample period. 
+- Next, tune the model such that the penalty term is flexibly chosen by cross-validation. For that purpose, update the model such that both, `penalty` and `mixture` are flexible tuning variables. Use the function `time_series_cv` to generate a time series cross-validation sample which allows tuning the model with 20 random samples of length five years with a validation period of four years. Tune the model for a grid of possible penalty and mixture values and visualize the mean-squared prediction errors for the industry returns across the range of possible tuning parameters. 
+- Finally, write a function to parallelize the entire workflow. The function should split the data into a training and test set, create a cross-validation scheme, and tunes a lasso model for different penalty values. Finally, select the best model in terms of MSPE in the validation test set. Apply the function to every individual industry and illustrate for each industry which factor and macroeconomic variables are selected by the Lasso. 
+
+## Python
+- Familiarize yourself with the `scikit-learn` workflow. First, restrict yourself to just one industry, e.g. `Manufacturing`. Use the function `train_test_split` to split the sample into a training and a test set. 
+- Preprocess the data with `ColumnTransformer` which performs the following steps: First, the aim is to explain the industry excess returns as a function of all predictors. Exclude the column month from the analysis. Include all interaction terms between factors and macroeconomic predictors. Demean and scale each regressor such that the standard deviation is one.
+- Build a model `ElasticNet` with `sklearn.linear_model` with a fixed penalty term that performs lasso regression. Create a `Pipeline` that first applies the recipe steps to the training data and then fits the model. Illustrate the predicted industry returns for the in-sample and the out-of-sample period. 
+- Next, tune the model such that the penalty term is flexibly chosen by cross-validation. For that purpose, update the model such that both, `penalty` and `mixture` are flexible tuning variables. Use the function `TimeSeriesSplit` to generate a time series cross-validation sample which allows tuning the model with 20 random samples of length five years with a validation period of four years. Tune the model for a grid of possible penalty and mixture values and visualize the mean-squared prediction errors for the industry returns across the range of possible tuning parameters. 
+- Finally, write a function to parallelize the entire workflow. The function should split the data into a training and test set, create a cross-validation scheme, and tunes a lasso model for different penalty values. Finally, select the best model in terms of MSPE in the validation test set. Apply the function to every individual industry and illustrate for each industry which factor and macroeconomic variables are selected by the Lasso. 
+:::
+
+**Solutions: **
+All solutions are provided in the book chapter *Factor selection via machine learning* ([R](https://www.tidy-finance.org/r/factor-selection-via-machine-learning.html) or [Python](https://www.tidy-finance.org/python/factor-selection-via-machine-learning.html) version).

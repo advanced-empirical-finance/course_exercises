@@ -1,0 +1,48 @@
+---
+title: "Introduction to Tidy Finance"
+--- 
+
+The main aim of this chapter is to familiarize yourself with tidy coding principles. We start by downloading and visualizing stock data before we move to a simple portfolio choice problem. These examples introduce you to our approach of *Tidy Finance*.
+
+## Working with stock market data
+
+**Exercises:**
+
+1. Download daily prices for one stock market ticker of your choice (e.g. *AAPL*) from Yahoo!Finance. Plot the time series of adjusted closing prices. To download the data with R you can use the command `tq_get` from the `tidyquant` package. If you do not know how to use it, make sure you read the help file by calling `?tq_get`. I especially recommended taking a look at the examples section in the documentation. For Python, you may want to inspect the documentation of the `yfinance` package.
+1. Compute daily net returns for the asset and visualize the distribution of daily returns in a histogram using `ggplot2` (R) or `plotnine` (Python). Also, use `geom_vline()` to add a dashed red line that indicates the 5\% quantile of the daily returns within the histogram. 
+1. Compute summary statistics (mean, standard deviation, minimum and maximum) for the daily returns.
+
+**Solutions:** All tasks are solved and described in detail in [Chapter 1.1 in Tidy Finance with R](https://www.tidy-finance.org/r/introduction-to-tidy-finance.html). For a Python version of the code, consult [Chapter 1.1 in Tidy Finance with Python](https://www.tidy-finance.org/python/introduction-to-tidy-finance.html)
+
+## Scaling up the analysis
+
+As a next step, we generalize the code from before such that all the computations can handle an arbitrary vector of tickers (e.g., all constituents of an index). Following tidy principles, it is quite easy to download the data, plot the price time series, and tabulate the summary statistics for an arbitrary number of assets.
+
+**Exercises:**
+
+1. Now the tidyverse magic starts: Take your code from before and generalize it such all the computations are performed for an arbitrary vector of tickers (e.g., `ticker <- c("AAPL", "MMM", "BA")` (R) or `ticker = ["AAPL", "MMM", "BA"]` (Python)). You can also call `ticker <- tq_index("DOW")` (R) to get daily data from all constituents of the Dow Jones index. Automate the download, the plot of the price time series, and create a table of return summary statistics for this arbitrary number of assets.
+1. Consider the research question *Are days with high aggregate trading volume often followed by high aggregate trading volume days?* How would you investigate this question? Hint: Compute the aggregate daily trading volume (in USD) and find an appropriate visualization to analyze the question.    
+
+**Solutions:** All tasks are solved and described in detail in Tidy Finance with R in the Chapters [Scaling up the analysis](https://www.tidy-finance.org/introduction-to-tidy-finance.html#scaling-up-the-analysis) and [Other forms of data aggregation](https://www.tidy-finance.org/r/introduction-to-tidy-finance.html#other-forms-of-data-aggregation) and in Tidy with Python in the Chapters [Scaling up the analysis](https://www.tidy-finance.org/python/introduction-to-tidy-finance.html#scaling-up-the-analysis) and [Other forms of data aggregation](https://www.tidy-finance.org/python/introduction-to-tidy-finance.html#other-forms-of-data-aggregation).
+
+## Portfolio choice problems
+
+**Exercises:**
+
+1. Compute *monthly* returns from all adjusted daily Dow Jones constituent prices. Hint for Python users: You can download the constituents of the Dow Jones 30 index from [this](https://www.ssga.com/us/en/institutional/etfs/library-content/products/fund-data/etfs/us/holdings-daily-us-en-dia.xlsx) homepage. 
+2. Compute the vector of historical average returns and the sample variance-covariance matrix.
+3. Compute the minimum variance portfolio weights and the portfolio volatility and average returns. 
+4. Visualize the mean-variance efficient frontier. For that, first, compute the efficient portfolio for an arbitrary risk-free rate (below the average return of the minimum variance portfolio). Then use the two-fund separation theorem to compute the location of a grid of combinations of the minimum variance portfolio and the efficient portfolio on the mean-volatility diagram which has (annualized) volatility on the $x$ axis and (annualized) expected returns on the $y$ axis. Indicate the location of the individual assets on the mean-volatility diagram as well.
+
+**Solutions:** All tasks are solved and described in detail in [Tidy Finance with R](https://www.tidy-finance.org/r/introduction-to-tidy-finance.html#portfolio-choice-problems) and [Tidy Finance with Python](https://www.tidy-finance.org/r/introduction-to-tidy-finance.html#portfolio-choice-problems), in the Chapters *Portfolio Choice Problems* and *The Efficient Frontier*.
+  
+## Equivalence between Certainty equivalent maximization and minimum variance optimization
+
+In the lecture slides (Parameter uncertainty), I argue that an investor with a quadratic utility function with a certainty equivalent $$\max_w CE(w) = \omega'\mu - \frac{\gamma}{2} \omega'\Sigma \omega \text{ s.t. } \iota'\omega = 1$$
+faces an equivalent optimization problem to a framework where portfolio weights are chosen to minimize volatility given a pre-specified level or expected returns
+$$\min_w \omega'\Sigma \omega \text{ s.t. } \omega'\mu = \bar\mu \text{ and } \iota'\omega = 1$$
+Note the differences: In the first case, the investor has a (known) risk aversion $\gamma$ which determines her optimal balance between risk ($\omega'\Sigma\omega)$ and return ($\mu'\omega$). In the second case, the investor has a target return she wants to achieve while minimizing the volatility. Intuitively, both approaches are closely connected if we consider that the risk aversion $\gamma$ determines the desirable return $\bar\mu$. More risk-averse investors (higher $\gamma$) will choose a lower target return to keep their volatility level down. The efficient frontier then spans all possible portfolios depending on the risk aversion $\gamma$, starting from the minimum variance portfolio ($\gamma = \infty$). 
+
+**Exercises: ** Proof that the optimal portfolio weights are equivalent in both cases. 
+
+**Solutions:** The proofs are provided in the [Appendix of Tidy Finance with R](https://www.tidy-finance.org/r/proofs.html).

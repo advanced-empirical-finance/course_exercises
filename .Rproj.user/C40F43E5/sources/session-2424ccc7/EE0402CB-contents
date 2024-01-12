@@ -1,0 +1,52 @@
+# Accessing & managing financial data
+
+**Exercises:**
+
+1. Read the book chapters [Accessing & managing financial data](https://www.tidy-finance.org/r/accessing-and-managing-financial-data.html) and [WRDS, CRSP, and Compustat](https://www.tidy-finance.org/r/wrds-crsp-and-compustat.html) entirely. If you prefer to read Python code, the chapters are available [here](https://www.tidy-finance.org/python/accessing-and-managing-financial-data.html) and [here](https://www.tidy-finance.org/python/wrds-crsp-and-compustat.html). They may contain some advanced concepts but also a description of almost every important dataset relevant to research in empirical finance.
+2. Consult the material on Absalon on how to get the raw CRSP data as a KU student. Download the raw monthly CRSP data from the Bloomberg terminals in building 26 and follow the cleaning steps described in *Downloading and Preparing CRSP* ([R](https://www.tidy-finance.org/wrds-crsp-and-compustat.html#downloading-and-preparing-crsp) and [Python](https://www.tidy-finance.org/python/wrds-crsp-and-compustat.html)). To get more information on how to compute returns adjusted for delisting, follow the procedure described in Chapter 7.2 of the book *Empirical Asset Pricing*.
+
+3. Download the files `tidy_finance_r.sqlite` and `tidy_finance_python.sqlite` from Absalon. Optimally you store it in the folder called `data` within your standard working directory for the course. Almost all exercises from now on will start with reading data out of this file, so make sure you familiarize yourself with this short *minimal setup to load data into your R or Python session memory from a fresh session* (you can consult it anytime again later during the course). 
+
+> From now on, all you need to do to access data that is stored in the database is to follow three steps: (i) Establish the connection to the SQLite database, (ii) call the table you want to extract, and (iii) collect the data. For your convenience, the following steps show all you need compactly.
+
+::: {.panel-tabset group="language"}
+## Python
+
+```{python}
+#| eval: false
+import pandas as pd
+import sqlite3
+
+tidy_finance = sqlite3.connect(
+  database="../data/tidy_finance_python.sqlite"
+)
+
+crsp_monthly = (pd.read_sql_query(
+  sql=("SELECT permno, month, industry, ret_excess " 
+       "FROM crsp_monthly"),
+  con=tidy_finance_python,
+  parse_dates={"month"})
+  .dropna()
+)
+```
+
+## R
+
+```{r}
+#| eval: false
+    library(tidyverse)
+    library(RSQLite)
+    tidy_finance <- dbConnect(SQLite(), 
+                              "../data/tidy_finance_r.sqlite", 
+                              extended_types = TRUE)
+    factors_ff_monthly <- tbl(tidy_finance, "factors_ff3_monthly") 
+    factors_ff_monthly <- factors_ff_monthly |> collect()
+``` 
+
+:::
+
+4. As always (but this is important): If you need help with the SQL database, post your question on Absalon. Your TA, your peers, and I will help you!
+5. Replicate the following two figures provided in the lecture slides: i) Create a time series of the number of stocks in the CRSP sample, which are listed on NASDAQ, NYSE, and AMEX. ii) Illustrate the time series of total market values (inflation-adjusted) based on industry classification `siccd`. The book *Empirical Asset Pricing* (Bali, Murrey, and Engle) provides a detailed walk-through if you need help.
+
+**Solutions:** 
+All solutions are provided in the book chapter *WRDS, CRSP, and Compustat* ([R version](https://www.tidy-finance.org/r/wrds-crsp-and-compustat.html) and [Python version](https://www.tidy-finance.org/python/wrds-crsp-and-compustat.html)) and the lecture slides.

@@ -1,0 +1,24 @@
+project:
+  type: website
+
+website:
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - section: "Introduction"
+        contents:
+          - index.qmd
+          - introduction.qmd
+      - section: "Asset Pricing"
+        contents:
+          - financial_data.qmd
+          - asset_pricing.qmd
+      - section: "Machine Learning"
+        contents:
+          - machine_learning.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true

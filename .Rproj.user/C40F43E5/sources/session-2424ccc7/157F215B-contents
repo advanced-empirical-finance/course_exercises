@@ -1,0 +1,34 @@
+---
+title: "Asset Pricing"
+---
+
+# Beta Estimation
+
+**Exercises:**
+
+1. Read in the clean CRSP data (`crsp_monthly`) set from the `tidy_finance_*.sqlite` file (if you do not recall how to do this, check the previous chapter)
+1. Read in the Fama-French monthly market returns (`factors_ff_monthly`) from the database
+1. Compute the market beta $\beta_\text{AAPL}$ of ticker `AAPL` (`permno == 14593`). You can use the function `lm()` (R) or `smf.ols` (Python) for that purpose (alternatively: compute the well-known OLS estimate $(X'X)^{-1}X'Y$ on your own).
+1. For monthly data, it is common to compute $\beta_i$ based on a rolling window of length five years. Implement a rolling procedure that estimates assets market beta each month based on the last 60 observations. You can use the package `slider` (R), `statsmodels.regression.rolling` (Python), or a simple `for` loop. (*Note*: this is going to be a time-consuming computational task)
+1. Store the beta estimates in the `tidy_finance_*.sqlite` database as `beta_exercise` (the file `tidy_finance_*.sqlite` already contains a table `beta` with the estimated values from the textbook - it may be a good idea to compare your results with the ones we get).
+1. Provide summary statistics for the cross-section of estimated betas
+1. What is the theoretical prediction of CAPM concerning the relationship between market beta and expected returns? What would you expect if you create portfolios based on beta (you create a high- and a low-beta portfolio each month and track the performance over time)? How should the expected returns differ between high and low-beta portfolios?
+
+**Solutions:**
+All solutions are provided in the book chapter [Beta estimation (R version)](https://www.tidy-finance.org/r/beta-estimation.html) or [Beta estimation (Python version)](https://www.tidy-finance.org/python/beta-estimation.html)
+
+# Univariate sorts
+
+**Exercises:**
+
+1. Load the monthly CRSP file, the Fama-French Factors, and the estimated betas from the `tidy_finance_*.sqlite` database. 
+1. Create portfolio sorts based on the *lagged* beta. Specifically, you compute the breakpoint as the median *lag* beta each month. Then, you compute the returns of a portfolio that invests only in the stocks with a higher beta than the breakpoint and a portfolio that invests only in the stocks with a lower beta than the breakpoints. The portfolio weights can either be equal or value-weighted.
+1. What are the monthly excess returns of both portfolios?
+1. Does a portfolio that goes long high beta stocks and short low beta stocks yield an excess return significantly different from zero?
+1. Write a general function for portfolio sorts based on a variable number of breakpoints. Then, compute portfolio returns based on *lagged* beta decile sorts. 
+1. What is the CAPM alpha of the ten portfolio returns? Is this finding in line with your expectations based on the CAPM implications?
+1. Does a high beta minus low beta portfolio yield abnormal excess returns? 
+
+**Solutions:**
+All solutions are provided in the book chapter [Univariate portfolio sorts (R Version)](https://www.tidy-finance.org/r/univariate-portfolio-sorts.html) or [Univariate portfolio sorts (Python Version)](https://www.tidy-finance.org/python/univariate-portfolio-sorts.html)
+

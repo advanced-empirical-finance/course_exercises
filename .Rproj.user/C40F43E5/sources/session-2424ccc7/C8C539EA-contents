@@ -1,0 +1,23 @@
+---
+title: "Welcome!"
+link-citations: true
+links-as-notes: true
+description: 'This is a collection of exercises as well as solutions that should be solved by students of the course Advanced Empirical Finance: Topics and Data Science.'
+---
+  
+In the course "Advanced Empirical Finance" we repeatedly ask: (How) can state-of-the-art methods improve financial decision-making?
+
+While the lecture covers all relevant theoretical aspects and is based on very recent academic papers, you should spend most of your effort on this course on actually doing empirical work! Get your computer ready to work on real problems for financial applications and discuss your code with your peers to acquire the necessary skills to make a difference either in the Finance industry or academia. 
+
+This set of exercises is written for the students of the lecture "Advanced Empirical Finance: Topics and Data Science".
+The exercise sets partially subsume work I created with my colleagues Christoph Scheuch and Patrick Weiss for the books [Tidy Finance with R](https://www.tidy-finance.org/r/index.html) and [Tidy Finance with Python](https://www.tidy-finance.org/python/index.html). You are very welcome to give us feedback on *every* aspect of the book such that we can improve the codes, explanations, and general structure. Please contact me or my colleagues directly via [contact@tidy-finance.org](mailto:contact@tidy-finance.org) if you spot typos, mistakes, or other issues that deserve more attention. 
+
+Needless to say, you should try to solve each question on your own before you refer to my proposed answers. 
+Optimally, you discuss issues with your peers and try to find hints either in the lecture slides or online. 
+There are many ways to get an answer to your questions, most directly you can simply post your questions on StackExchange or Absalon. 
+
+As an absolute minimum before trying to solve the following exercises, make sure you are familiar with Garrett Grolemund's and Hadley Wickham's excellent book [R for Data Science](https://r4ds.hadley.nz/). I will make further information or references available on Absalon. 
+
+## Things to get done before the first lecture {.unnumbered}
+
+To dive right into it, check the [readme](https://github.com/advanced-empirical-finance/course_environment_AEF) file to comply with the technical prerequisites of this course - you should have R, Quarto, and RStudio ready to get started. 
