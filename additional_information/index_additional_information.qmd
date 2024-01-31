@@ -1,0 +1,7 @@
+---
+title: "Good to know"
+link-citations: true
+links-as-notes: true
+description: 'This is a collection of small blog posts with ideas regarding code style, collaboration, use of AI, and more composed to help you in Advanced Empirical Finance: Topics and Data Science.'
+---
+

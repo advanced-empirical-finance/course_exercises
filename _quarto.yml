@@ -2,21 +2,38 @@ project:
   type: website
 
 website:
-  sidebar:
-    style: "docked"
+  title: Advanced Empirical Finance
+  navbar:
     search: true
-    contents:
-      - section: "Introduction"
-        contents:
-          - index.qmd
-          - introduction.qmd
-      - section: "Asset Pricing"
-        contents:
-          - financial_data.qmd
-          - asset_pricing.qmd
-      - section: "Machine Learning"
-        contents:
-          - machine_learning.qmd
+    left:
+      - text: "Exercises"
+        file: index.qmd
+      - text: "More"
+        file: additional_information/index_additional_information.qmd
+        
+  sidebar:
+    - title: "Exercises"
+      style: "docked"
+      search: true
+      contents:
+        - section: "Introduction"
+          contents:
+            - index.qmd
+            - introduction.qmd
+        - section: "Asset Pricing"
+          contents:
+            - financial_data.qmd
+            - asset_pricing.qmd
+        - section: "Machine Learning"
+          contents:
+            - machine_learning.qmd
+    
+    - title: "More"
+      contents:
+          - additional_information/index_additional_information.qmd
+          - additional_information/github_copilot.qmd
+          - additional_information/intro_to_quarto.qmd
+          - additional_information/workflow_and_style.qmd
 
 format:
   html:

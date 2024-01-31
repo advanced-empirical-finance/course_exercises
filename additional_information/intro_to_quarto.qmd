@@ -1,0 +1,60 @@
+---
+title: "Introduction to Quarto"
+---
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| eval: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+But you can also use other languages in Quarto such as Python. Creating a code chunk, you need to click in insert, then execuatble cell and then choose the desired programming language. A short cut is is Ctlr+Alt+I.
+
+The following cell is python, as you can read in the upper left corner.\$\$f(x)=x\^2\$\$
+
+```{python}
+#| eval: false
+
+#Defining a function  in python
+def f_p(x):
+  
+  return x**2
+
+f_p(2)
+
+```
+
+Let's implement the same function but in R:
+
+```{r}
+#| eval: false
+
+#Defining a function in R:
+
+f_r <- function(x) {
+  return(x^2)
+}
+
+f_r(2)
+
+```
+
+<div>
+```{=html}
+<iframe class="slide-deck" src="slides.html/"></iframe>
+```
+</div>
+

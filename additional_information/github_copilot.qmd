@@ -1,0 +1,55 @@
+---
+title: "AI integration to RStudio"
+---
+
+Many AI tools exist to support you in writing better, consistent code. As always, often this help is practical and functional, but the typical disclaimer applies: Trust but verify the output. Generative AI doesn’t have general intelligence but is only a model that has been trained on a lot of data. It is essential to review the suggestions to ensure they are accurate and correct.
+
+## Github Copilot
+
+> **GitHub Copilot is an AI pair programmer that offers auto complete-style suggestions and real-time hints for the code you are writing by providing suggestions as “ghost text” based on the context of the surrounding code - GitHub Copilot docs**
+
+### Connect RStudio with Github
+
+To use Github Copilot, you must have a Github account and an active subscription to Copilot. GitHub Copilot is free to use for verified students by signing up for the [Student Developer Pack](https://education.github.com/pack). To enable GitHub Copilot in RStudio, follow the simple steps outlined [here](https://docs.posit.co/ide/user/ide/guide/tools/copilot.html#setup).
+
+### Example in RStudio
+
+Copilot offers auto complete-style suggestions (for R and Python) as you code as “ghost text”. This ghost-text is similar to the existing auto complete available in RStudio but, importantly, is a generated suggestion rather than an exact auto-completion. When coding in RStudio, Copilot's suggestions will be presented as grey “ghost text.” You can accept those by pressing `Tab`.
+
+------------------------------------------------------------------------
+
+Example 1: Suppose you want to write a function that computes log returns based on a vector called prices. The following prompt already triggers a (correct) answer by Github Copilot
+
+```{r}
+#| eval: FALSE
+compute_log_returns <- function(prices){
+```
+
+{{< video https://youtu.be/lDhOMmmwUsg>}}
+
+
+However, for many other cases Copilot may offer wrong answers. For instance, try to have Copilot write a function which computes efficient tangency portfolio weights. Just based on a meaningful function name, Copilot does not seem to be able to complete the task. In such a case, comments can help to yield more useful prompts.
+
+------------------------------------------------------------------------
+
+Example 2: Suppose you have a question: Use a comment with a `# Q:` at the beginning and a question mark at the end.
+
+```{r}
+#| eval: FALSE
+
+# Q: How do I compute the realized variance of stock returns?
+```
+
+{{< video https://youtu.be/p1dAFVyF-FE >}}
+
+------------------------------------------------------------------------
+
+Example 3: Github Copilot also offers support for Python code.
+
+{{< video https://youtu.be/hJpDMoLocKM >}}
+
+### Additional material
+
+<https://docs.posit.co/ide/user/ide/guide/tools/copilot.html#using-copilot>
+
+<https://colorado.posit.co/rsc/rstudio-copilot/#/TitleSlide>
