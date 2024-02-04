@@ -137,7 +137,7 @@ In R
 prices |>  
   group_by(volume) |> 
   summarize(
-    delay = mean(adjusted, na.rm = TRUE),
+    mean_adjusted = mean(adjusted, na.rm = TRUE),
     n = n()
   )
 
@@ -146,7 +146,7 @@ prices |>
   group_by(
     volume
   ) |> 
-  summarize(delay = mean(adjusted, na.rm = TRUE), n = n())
+  summarize(mean_adjusted = mean(adjusted, na.rm = TRUE), n = n())
 ```
 
 In Python
@@ -181,7 +181,7 @@ In R
 prices |>  
   group_by(volume) |> 
   summarize(
-    delay = mean(adjusted, na.rm = TRUE),
+   mean_adjusted = mean(adjusted, na.rm = TRUE),
     n = n()
   )
 
@@ -189,7 +189,7 @@ prices |>
 prices|>
   group_by(volume) |> 
   summarize(
-             delay = mean(adjusted, na.rm = TRUE), 
+            mean_adjusted = mean(adjusted, na.rm = TRUE), 
              n = n()
            )
 
@@ -197,7 +197,7 @@ prices|>
 prices|>
   group_by(volume) |> 
   summarize(
-  delay = mean(adjusted, na.rm = TRUE), 
+  mean_adjusted = mean(adjusted, na.rm = TRUE), 
   n = n()
   )
 ```
@@ -210,14 +210,14 @@ In Python
 #Strive
 
 prices.groupby('volume') \
-              .agg(delay=('adjusted', 'mean'), n=('adjusted', 'size')) \
+              .agg(mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
               .reset_index()
 
 # Avoid
 
 prices.groupby('volume') \
               .agg(
-                delay=('adjusted', 'mean'), n=('adjusted', 'size')) \
+               mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
               .reset_index()
 
 
@@ -226,7 +226,7 @@ prices.groupby('volume') \
 # Avoid
 prices.groupby('volume') \
               .agg(
-               delay=('adjusted', 'mean'), n=('adjusted', 'size')) \
+               mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
               .reset_index()
 
 
@@ -234,6 +234,96 @@ prices.groupby('volume') \
 
 ```
 :::
+
+## ggplot2
+
+The same basic rules that apply to the pipe also apply to ggplot2; just treat + the same way as \|\>
+
+```{r}
+prices |> 
+  group_by(date) |> 
+  summarize(
+    mean_adjusted = mean(adjusted, na.rm = TRUE)
+  ) |> 
+  ggplot(aes(x = date, y = mean_adjusted)) +
+  geom_point() + 
+  geom_line()
+
+```
+
+```{r}
+
+prices %>%
+  group_by(date) %>%
+  summarize(
+    mean_high_low = mean(c(high, low), na.rm = TRUE)
+  ) %>%
+  ggplot(aes(x = date, y = mean_high_low)) +
+  geom_point() + 
+  geom_line()
+
+
+
+
+
+
+
+```
+
+
+```{python}
+
+from plotnine import ggplot, aes, geom_point, geom_line
+from plotnine.stats import mean_sdl
+from plotnine import ggtitle
+
+prices
+        .groupby('date')
+        .agg(mean_high_low=('high', 'mean'))
+        .reset_index()
+        .pipe(ggplot, aes(x='date', y='mean_high_low'))
+        + geom_point()
+        + geom_line())
+
+# Print the plot
+print(plot)
+
+
+
+```
+
+
+
+
+
+
+
+
+
+In Python
+
+```{python}
+
+import pandas as pd
+from plotnine import ggplot, aes, geom_point, geom_line, labs,theme_minimal
+
+# Group by date and calculate the mean of 'adjusted'
+summary_data = (prices.groupby('date')
+                 .agg(mean_adjusted=('adjusted', 'mean'))
+                 .reset_index())
+
+# Create the ggplot
+plot = (ggplot(summary_data, aes(x='date', y='adjusted'))
+        + geom_point()
+        + geom_line(aes(group=1)))  
+
+# Show the plot
+print(plot)
+
+
+
+```
+
 
 ## Styler package(for R)
 
@@ -251,7 +341,9 @@ z <- (a + b)^2/d
 
 Notice as the "Avoid" now resembles "Strive"
 
-## PEP8 package(for R)
+## PEP8 package(for Python)
+
+An equivalent tool in Python, known as PEP8, offers a different approach to code formatting. By executing the command "autopep8 your_file_name.py --in-place --aggressive --verbose" in the terminal, the code will be automatically adjusted to adhere to the PEP8 styling guidelines.
 
 ```{python}
 
