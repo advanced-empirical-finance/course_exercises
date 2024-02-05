@@ -239,91 +239,31 @@ prices.groupby('volume') \
 
 The same basic rules that apply to the pipe also apply to ggplot2; just treat + the same way as \|\>
 
+::: {.panel-tabset group="language"}
 ```{r}
-prices |> 
-  group_by(date) |> 
-  summarize(
-    mean_adjusted = mean(adjusted, na.rm = TRUE)
-  ) |> 
-  ggplot(aes(x = date, y = mean_adjusted)) +
+prices |>
+  filter(volume > 3000) |>
+  ggplot(aes(x = date, y = adjusted)) +
   geom_point() + 
-  geom_line()
-
+  geom_line() +
+  labs(x = "Date", y = "Adjusted Price", title = "Adjusted Prices when Volume > 3000")
 ```
-
-```{r}
-
-prices %>%
-  group_by(date) %>%
-  summarize(
-    mean_high_low = mean(c(high, low), na.rm = TRUE)
-  ) %>%
-  ggplot(aes(x = date, y = mean_high_low)) +
-  geom_point() + 
-  geom_line()
-
-
-
-
-
-
-
-```
-
-
-```{python}
-
-from plotnine import ggplot, aes, geom_point, geom_line
-from plotnine.stats import mean_sdl
-from plotnine import ggtitle
-
-prices
-        .groupby('date')
-        .agg(mean_high_low=('high', 'mean'))
-        .reset_index()
-        .pipe(ggplot, aes(x='date', y='mean_high_low'))
-        + geom_point()
-        + geom_line())
-
-# Print the plot
-print(plot)
-
-
-
-```
-
-
-
-
-
-
-
-
-
-In Python
 
 ```{python}
 
 import pandas as pd
-from plotnine import ggplot, aes, geom_point, geom_line, labs,theme_minimal
+from plotnine import ggplot, aes, geom_point, geom_line, labs
 
-# Group by date and calculate the mean of 'adjusted'
-summary_data = (prices.groupby('date')
-                 .agg(mean_adjusted=('adjusted', 'mean'))
-                 .reset_index())
-
-# Create the ggplot
-plot = (ggplot(summary_data, aes(x='date', y='adjusted'))
-        + geom_point()
-        + geom_line(aes(group=1)))  
-
-# Show the plot
-print(plot)
+ prices[prices['volume'] > 3000].
+   (ggplot(filtered_prices, aes(x='date', y='adjusted')) +
+   geom_point() +
+   geom_line() +
+   labs(x="Date", y="Adjusted Price", title="Adjusted Prices when Volume > 3000"))
 
 
 
 ```
-
+:::
 
 ## Styler package(for R)
 
