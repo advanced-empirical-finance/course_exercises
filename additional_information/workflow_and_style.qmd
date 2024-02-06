@@ -1,4 +1,15 @@
-# Coding workflow and code style
+---
+title: "Code style"
+execute: 
+  eval: False
+---
+
+Good coding style is like correct spacing: you can manage without, butitsuremakesthingseaisertoread. :-)
+
+Following some general rules on code styles with R and Python makes it easier for you and collaborators to read, understand, and thus improve code. 
+
+::: {.panel-tabset group="language"}
+## R
 
 ```{r}
 library(tidyverse)
@@ -11,14 +22,26 @@ prices <- tq_get("AAPL",
   to = "2022-12-31"
 )
 
-write.csv(prices, "prices.csv", row.names = FALSE)
-
 ```
+## Python
+
+```{python}
+import yfinance as yf
+
+prices = yf.download(
+    tickers="AAPL", 
+    start="2000-01-01", 
+    end="2022-12-31", 
+    progress=False
+  )
+```
+::: 
 
 ## Name Conventions
 
+As a fundamental guideline, opt for longer, descriptive names that offer clarity rather than opting for concise names for the sake of quick typing. While brief names may save minimal time during initial code composition, especially with autocomplete assistance, they can prove time-consuming when revisiting older code and attempting to decipher cryptic abbreviations.
+
 ```{r}
-#| eval: False
 # Strive for:
 prices_high <- prices |> filter(adjusted > 0.9)
 
@@ -27,17 +50,15 @@ PRICESHIGH <- prices |> filter(adjusted > 0.9)
 
 ```
 
-As a fundamental guideline, opt for longer, descriptive names that offer clarity rather than opting for concise names for the sake of quick typing. While brief names may save minimal time during initial code composition, especially with autocomplete assistance, they can prove time-consuming when revisiting older code and attempting to decipher cryptic abbreviations.
 
 ## Spaces
 
 Put spaces on either side of mathematical operators apart from \^ (i.e. +, -, ==, \<, …), and around the assignment operator (\<-).
 
 ::: {.panel-tabset group="language"}
-In R
+## R
 
 ```{r}
-#| eval: False
 a <- 2
 b <- 1
 d <- 2
@@ -46,20 +67,14 @@ z <- (a + b)^2 / d
 
 # Avoid
 z<-(a+b)^2/d
-
-
-
 ```
 
-In Python
+## Python
 
 ```{python}
-#| eval: False
-
 a = 2
 b = 1
 d = 2
-
 
 # Strive for
 z = (a + b)**2 / d
@@ -72,8 +87,6 @@ z=(a+b)**2/d
 Don’t put spaces inside or outside parentheses for regular function calls. Always put a space after a comma, just like in standard English. This also valid for python.
 
 ```{r}
-#| eval: False
-
 # Strive for}
 x <- c(1, 2, 3, 4)
 
@@ -86,14 +99,12 @@ mean (x ,na.rm=TRUE)
 
 ## Pipes
 
-\|\> should always have a space before it and should typically be the last thing on a line. This makes it easier to add new steps, rearrange existing steps, modify elements within a step, and get a 10,000 ft view by skimming the verbs on the left-hand side.
+\|\> and \. should always have a space before it and should typically be the last thing on a line. This makes it easier to add new steps, rearrange existing steps, modify elements within a step, and get a 10,000 ft view by skimming the verbs on the left-hand side.
 
 ::: {.panel-tabset group="language"}
-In R
+## R
 
 ```{r}
-#| eval: False
-
 # Strive for 
 prices |>  
   filter(!is.na(date), !is.na(adjusted)) |> 
@@ -103,19 +114,17 @@ prices |>
 prices|>filter(!is.na(date), !is.na(adjusted))|>count(symbol)
 ```
 
-In Python
+## Python
 
 ```{python}
 import pandas as pd
 
-# Now pass 'prices' to Python
-
-prices = pd.read_csv("prices.csv")
-
 # Strive for
-prices.query('not date.isna() and not adjusted.isna()') \
-       .groupby('symbol') \
-       .count()
+(prices
+  .query('not date.isna() and not adjusted.isna()')
+  .groupby('symbol')
+  .count()
+)
 
 # Avoid
 prices.query('not date.isna() and not adjusted.isna()').groupby('symbol').count()
@@ -128,11 +137,9 @@ If the function you're chaining into has named arguments (e.g., **`mutate()`** o
 However, if the function being chained does not have named arguments (e.g., **`select()`** or **`filter()`** in R, or functions without named parameters in Python), keeping everything on one line is acceptable. If it doesn't fit on a single line, consider putting each argument on its own line for better visibility.
 
 ::: {.panel-tabset group="language"}
-In R
+## R
 
 ```{r}
-#| eval: False
-
 # Strive for
 prices |>  
   group_by(volume) |> 
@@ -149,34 +156,27 @@ prices |>
   summarize(mean_adjusted = mean(adjusted, na.rm = TRUE), n = n())
 ```
 
-In Python
+## Python
 
 ```{python}
-#| eval: False
-
 # Strive for
-prices.groupby('volume') \
-                       .agg(adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
-                       .reset_index()
+(prices
+  .groupby('volume')
+  .agg(adjusted=('adjusted', 'mean'), n=('adjusted', 'size'))
+  .reset_index()
+)
 
 # Avoid
 prices.groupby('volume').agg(delay=('adjusted', 'mean'), n=('adjusted', 'size')).reset_index()
-
-
-
-
-
 ```
 :::
 
 After the first step of the pipeline, indent each line by two spaces. RStudio will automatically put the spaces in for you after a line break following a \> . If you’re putting each argument on its own line, indent by an extra two spaces. Make sure ) is on its own line, and un-indented to match the horizontal position of the function name.
 
 ::: {.panel-tabset group="language"}
-In R
+## R
 
 ```{r}
-#| eval: False
-
 # Strive for 
 prices |>  
   group_by(volume) |> 
@@ -202,35 +202,25 @@ prices|>
   )
 ```
 
-In Python
+## Python
 
 ```{python}
-#| eval: False
+#Strive for
 
-#Strive
-
-prices.groupby('volume') \
-              .agg(mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
-              .reset_index()
-
-# Avoid
-
-prices.groupby('volume') \
-              .agg(
-               mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
-              .reset_index()
-
-
-
+(prices
+  .groupby('volume')
+  .agg(mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size'))
+  .reset_index()
+)
 
 # Avoid
-prices.groupby('volume') \
-              .agg(
-               mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
-              .reset_index()
 
-
-
+(prices
+  .groupby('volume')
+  .agg(
+   mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size'))
+  .reset_index()
+ )
 
 ```
 :::
@@ -240,6 +230,8 @@ prices.groupby('volume') \
 The same basic rules that apply to the pipe also apply to ggplot2; just treat + the same way as \|\>
 
 ::: {.panel-tabset group="language"}
+
+##R 
 ```{r}
 prices |>
   filter(volume > 3000) |>
@@ -249,8 +241,8 @@ prices |>
   labs(x = "Date", y = "Adjusted Price", title = "Adjusted Prices when Volume > 3000")
 ```
 
+## Python
 ```{python}
-
 import pandas as pd
 from plotnine import ggplot, aes, geom_point, geom_line, labs
 
@@ -259,9 +251,6 @@ from plotnine import ggplot, aes, geom_point, geom_line, labs
    geom_point() +
    geom_line() +
    labs(x="Date", y="Adjusted Price", title="Adjusted Prices when Volume > 3000"))
-
-
-
 ```
 :::
 
@@ -270,8 +259,6 @@ from plotnine import ggplot, aes, geom_point, geom_line, labs
 First install the styler package, restart R studio. Go to "Addins", and click on "Set style". Afterwards, select the code you want to style,go again to "Addins", click on "Style selection". Try with the code below:
 
 ```{r}
-#| eval: False
-
 # Strive for
 z <- (a + b)^2 / d
 
@@ -279,20 +266,16 @@ z <- (a + b)^2 / d
 z <- (a + b)^2/d
 ```
 
-Notice as the "Avoid" now resembles "Strive"
+Notice as the adjustment the `styler` package implements.
 
 ## PEP8 package(for Python)
 
-An equivalent tool in Python, known as PEP8, offers a different approach to code formatting. By executing the command "autopep8 your_file_name.py --in-place --aggressive --verbose" in the terminal, the code will be automatically adjusted to adhere to the PEP8 styling guidelines.
+An equivalent tool in Python, known as PEP8, offers a different approach to code formatting. By executing the command `autopep8 your_file_name.py --in-place --aggressive --verbose` in the terminal, the code will be automatically adjusted to adhere to the PEP8 styling guidelines.
 
 ```{python}
-
-
 # Strive for
 z = (a + b)**2 / d
 
 # Avoid
 z = (a + b)**2/d
-
-
 ```
