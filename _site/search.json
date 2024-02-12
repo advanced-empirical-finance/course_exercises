@@ -6,6 +6,7 @@
     "section": "",
     "text": "In this Chapter, you get to know tidymodels (R) and scikit-learn (Python), a collection of packages for modeling and machine learning (ML) using tidy coding principles. From a finance perspective, you will apply penalized regressions to understand which factors and macroeconomic predictors may help to explain the cross-section of industry returns.\nExercises: \n\nIn this analysis, we use four different data sources. Load the monthly Fama-French 3-factor returns, the monthly q-factor returns from Hou, Xue, and Zhang (2014), the macroeconomic predictors from Welch and Goyal (2008), and monthly portfolio returns from 10 different industries according to the definition from Kenneth French’s homepage as test assets. Your data should contain 22 columns of regressors with 13 macro variables and 8-factor returns for each month.\n\nProvide meaningful summary statistics for the test assets’ excess returns.\n\n\nRPython\n\n\n\nFamiliarize yourself with the tidymodels workflow. First, restrict yourself to just one industry, e.g. Manufacturing. Use the function initial_time_split from the rsample package to split the sample into a training and a test set.\nPreprocess the data by creating a recipe which performs the following steps: First, the aim is to explain the industry excess returns as a function of all predictors. Exclude the column month from the analysis. Include all interaction terms between factors and macroeconomic predictors. Demean and scale each regressor such that the standard deviation is one.\nBuild a model linear_reg with tidymodels with a fixed penalty term that performs lasso regression. Create a workflow that first applies the recipe steps to the training data and then fits the model. Illustrate the predicted industry returns for the in-sample and the out-of-sample period.\nNext, tune the model such that the penalty term is flexibly chosen by cross-validation. For that purpose, update the model such that both, penalty and mixture are flexible tuning variables. Use the function time_series_cv to generate a time series cross-validation sample which allows tuning the model with 20 random samples of length five years with a validation period of four years. Tune the model for a grid of possible penalty and mixture values and visualize the mean-squared prediction errors for the industry returns across the range of possible tuning parameters.\nFinally, write a function to parallelize the entire workflow. The function should split the data into a training and test set, create a cross-validation scheme, and tunes a lasso model for different penalty values. Finally, select the best model in terms of MSPE in the validation test set. Apply the function to every individual industry and illustrate for each industry which factor and macroeconomic variables are selected by the Lasso.\n\n\n\n\nFamiliarize yourself with the scikit-learn workflow. First, restrict yourself to just one industry, e.g. Manufacturing. Use the function train_test_split to split the sample into a training and a test set.\nPreprocess the data with ColumnTransformer which performs the following steps: First, the aim is to explain the industry excess returns as a function of all predictors. Exclude the column month from the analysis. Include all interaction terms between factors and macroeconomic predictors. Demean and scale each regressor such that the standard deviation is one.\nBuild a model ElasticNet with sklearn.linear_model with a fixed penalty term that performs lasso regression. Create a Pipeline that first applies the recipe steps to the training data and then fits the model. Illustrate the predicted industry returns for the in-sample and the out-of-sample period.\nNext, tune the model such that the penalty term is flexibly chosen by cross-validation. For that purpose, update the model such that both, penalty and mixture are flexible tuning variables. Use the function TimeSeriesSplit to generate a time series cross-validation sample which allows tuning the model with 20 random samples of length five years with a validation period of four years. Tune the model for a grid of possible penalty and mixture values and visualize the mean-squared prediction errors for the industry returns across the range of possible tuning parameters.\nFinally, write a function to parallelize the entire workflow. The function should split the data into a training and test set, create a cross-validation scheme, and tunes a lasso model for different penalty values. Finally, select the best model in terms of MSPE in the validation test set. Apply the function to every individual industry and illustrate for each industry which factor and macroeconomic variables are selected by the Lasso.\n\n\n\n\nSolutions:  All solutions are provided in the book chapter Factor selection via machine learning (R or Python version).",
     "crumbs": [
+      "Exercises",
       "Machine Learning",
       "Machine Learning 1: Shrinkage Estimation"
     ]
@@ -17,6 +18,7 @@
     "section": "",
     "text": "In this Chapter, you get to know tidymodels (R) and scikit-learn (Python), a collection of packages for modeling and machine learning (ML) using tidy coding principles. From a finance perspective, you will apply penalized regressions to understand which factors and macroeconomic predictors may help to explain the cross-section of industry returns.\nExercises: \n\nIn this analysis, we use four different data sources. Load the monthly Fama-French 3-factor returns, the monthly q-factor returns from Hou, Xue, and Zhang (2014), the macroeconomic predictors from Welch and Goyal (2008), and monthly portfolio returns from 10 different industries according to the definition from Kenneth French’s homepage as test assets. Your data should contain 22 columns of regressors with 13 macro variables and 8-factor returns for each month.\n\nProvide meaningful summary statistics for the test assets’ excess returns.\n\n\nRPython\n\n\n\nFamiliarize yourself with the tidymodels workflow. First, restrict yourself to just one industry, e.g. Manufacturing. Use the function initial_time_split from the rsample package to split the sample into a training and a test set.\nPreprocess the data by creating a recipe which performs the following steps: First, the aim is to explain the industry excess returns as a function of all predictors. Exclude the column month from the analysis. Include all interaction terms between factors and macroeconomic predictors. Demean and scale each regressor such that the standard deviation is one.\nBuild a model linear_reg with tidymodels with a fixed penalty term that performs lasso regression. Create a workflow that first applies the recipe steps to the training data and then fits the model. Illustrate the predicted industry returns for the in-sample and the out-of-sample period.\nNext, tune the model such that the penalty term is flexibly chosen by cross-validation. For that purpose, update the model such that both, penalty and mixture are flexible tuning variables. Use the function time_series_cv to generate a time series cross-validation sample which allows tuning the model with 20 random samples of length five years with a validation period of four years. Tune the model for a grid of possible penalty and mixture values and visualize the mean-squared prediction errors for the industry returns across the range of possible tuning parameters.\nFinally, write a function to parallelize the entire workflow. The function should split the data into a training and test set, create a cross-validation scheme, and tunes a lasso model for different penalty values. Finally, select the best model in terms of MSPE in the validation test set. Apply the function to every individual industry and illustrate for each industry which factor and macroeconomic variables are selected by the Lasso.\n\n\n\n\nFamiliarize yourself with the scikit-learn workflow. First, restrict yourself to just one industry, e.g. Manufacturing. Use the function train_test_split to split the sample into a training and a test set.\nPreprocess the data with ColumnTransformer which performs the following steps: First, the aim is to explain the industry excess returns as a function of all predictors. Exclude the column month from the analysis. Include all interaction terms between factors and macroeconomic predictors. Demean and scale each regressor such that the standard deviation is one.\nBuild a model ElasticNet with sklearn.linear_model with a fixed penalty term that performs lasso regression. Create a Pipeline that first applies the recipe steps to the training data and then fits the model. Illustrate the predicted industry returns for the in-sample and the out-of-sample period.\nNext, tune the model such that the penalty term is flexibly chosen by cross-validation. For that purpose, update the model such that both, penalty and mixture are flexible tuning variables. Use the function TimeSeriesSplit to generate a time series cross-validation sample which allows tuning the model with 20 random samples of length five years with a validation period of four years. Tune the model for a grid of possible penalty and mixture values and visualize the mean-squared prediction errors for the industry returns across the range of possible tuning parameters.\nFinally, write a function to parallelize the entire workflow. The function should split the data into a training and test set, create a cross-validation scheme, and tunes a lasso model for different penalty values. Finally, select the best model in terms of MSPE in the validation test set. Apply the function to every individual industry and illustrate for each industry which factor and macroeconomic variables are selected by the Lasso.\n\n\n\n\nSolutions:  All solutions are provided in the book chapter Factor selection via machine learning (R or Python version).",
     "crumbs": [
+      "Exercises",
       "Machine Learning",
       "Machine Learning 1: Shrinkage Estimation"
     ]
@@ -28,6 +30,7 @@
     "section": "",
     "text": "In the course “Advanced Empirical Finance” we repeatedly ask: (How) can state-of-the-art methods improve financial decision-making?\nWhile the lecture covers all relevant theoretical aspects and is based on very recent academic papers, you should spend most of your effort on this course on actually doing empirical work! Get your computer ready to work on real problems for financial applications and discuss your code with your peers to acquire the necessary skills to make a difference either in the Finance industry or academia.\nThis set of exercises is written for the students of the lecture “Advanced Empirical Finance: Topics and Data Science”. The exercise sets partially subsume work I created with my colleagues Christoph Scheuch and Patrick Weiss for the books Tidy Finance with R and Tidy Finance with Python. You are very welcome to give us feedback on every aspect of the book such that we can improve the codes, explanations, and general structure. Please contact me or my colleagues directly via contact@tidy-finance.org if you spot typos, mistakes, or other issues that deserve more attention.\nNeedless to say, you should try to solve each question on your own before you refer to my proposed answers. Optimally, you discuss issues with your peers and try to find hints either in the lecture slides or online. There are many ways to get an answer to your questions, most directly you can simply post your questions on StackExchange or Absalon.\nAs an absolute minimum before trying to solve the following exercises, make sure you are familiar with Garrett Grolemund’s and Hadley Wickham’s excellent book R for Data Science. I will make further information or references available on Absalon.",
     "crumbs": [
+      "Exercises",
       "Introduction",
       "Welcome!"
     ]
@@ -39,6 +42,7 @@
     "section": "Things to get done before the first lecture",
     "text": "Things to get done before the first lecture\nTo dive right into it, check the readme file to comply with the technical prerequisites of this course - you should have R, Quarto, and RStudio ready to get started.",
     "crumbs": [
+      "Exercises",
       "Introduction",
       "Welcome!"
     ]
@@ -50,8 +54,130 @@
     "section": "",
     "text": "Beta Estimation\nExercises:\n\nRead in the clean CRSP data (crsp_monthly) set from the tidy_finance_*.sqlite file (if you do not recall how to do this, check the previous chapter)\nRead in the Fama-French monthly market returns (factors_ff_monthly) from the database\nCompute the market beta \\(\\beta_\\text{AAPL}\\) of ticker AAPL (permno == 14593). You can use the function lm() (R) or smf.ols (Python) for that purpose (alternatively: compute the well-known OLS estimate \\((X'X)^{-1}X'Y\\) on your own).\nFor monthly data, it is common to compute \\(\\beta_i\\) based on a rolling window of length five years. Implement a rolling procedure that estimates assets market beta each month based on the last 60 observations. You can use the package slider (R), statsmodels.regression.rolling (Python), or a simple for loop. (Note: this is going to be a time-consuming computational task)\nStore the beta estimates in the tidy_finance_*.sqlite database as beta_exercise (the file tidy_finance_*.sqlite already contains a table beta with the estimated values from the textbook - it may be a good idea to compare your results with the ones we get).\nProvide summary statistics for the cross-section of estimated betas\nWhat is the theoretical prediction of CAPM concerning the relationship between market beta and expected returns? What would you expect if you create portfolios based on beta (you create a high- and a low-beta portfolio each month and track the performance over time)? How should the expected returns differ between high and low-beta portfolios?\n\nSolutions: All solutions are provided in the book chapter Beta estimation (R version) or Beta estimation (Python version)\n\n\nUnivariate sorts\nExercises:\n\nLoad the monthly CRSP file, the Fama-French Factors, and the estimated betas from the tidy_finance_*.sqlite database.\nCreate portfolio sorts based on the lagged beta. Specifically, you compute the breakpoint as the median lag beta each month. Then, you compute the returns of a portfolio that invests only in the stocks with a higher beta than the breakpoint and a portfolio that invests only in the stocks with a lower beta than the breakpoints. The portfolio weights can either be equal or value-weighted.\nWhat are the monthly excess returns of both portfolios?\nDoes a portfolio that goes long high beta stocks and short low beta stocks yield an excess return significantly different from zero?\nWrite a general function for portfolio sorts based on a variable number of breakpoints. Then, compute portfolio returns based on lagged beta decile sorts.\nWhat is the CAPM alpha of the ten portfolio returns? Is this finding in line with your expectations based on the CAPM implications?\nDoes a high beta minus low beta portfolio yield abnormal excess returns?\n\nSolutions: All solutions are provided in the book chapter Univariate portfolio sorts (R Version) or Univariate portfolio sorts (Python Version)",
     "crumbs": [
+      "Exercises",
       "Asset Pricing",
       "Asset Pricing"
+    ]
+  },
+  {
+    "objectID": "additional_information/intro_to_quarto.html",
+    "href": "additional_information/intro_to_quarto.html",
+    "title": "Introduction to Quarto",
+    "section": "",
+    "text": "Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see https://quarto.org.",
+    "crumbs": [
+      "More",
+      "Introduction to Quarto"
+    ]
+  },
+  {
+    "objectID": "additional_information/intro_to_quarto.html#running-code",
+    "href": "additional_information/intro_to_quarto.html#running-code",
+    "title": "Introduction to Quarto",
+    "section": "Running Code",
+    "text": "Running Code\nWhen you click the Render button a document will be generated that includes both content and the output of embedded code. You can embed code like this:\n\n1 + 1\n\n[1] 2\n\n\nYou can add options to executable code like this\n\n2 * 2\n\nThe echo: false option disables the printing of code (only output is displayed).\nBut you can also use other languages in Quarto such as Python. Creating a code chunk, you need to click in insert, then execuatble cell and then choose the desired programming language. A short cut is is Ctlr+Alt+I.\nThe following cell is python, as you can read in the upper left corner.$$f(x)=x^2$$\n\n#Defining a function  in python\ndef f_p(x):\n  \n  return x**2\n\nf_p(2)\n\nLet’s implement the same function but in R:\n\n#Defining a function in R:\n\nf_r &lt;- function(x) {\n  return(x^2)\n}\n\nf_r(2)",
+    "crumbs": [
+      "More",
+      "Introduction to Quarto"
+    ]
+  },
+  {
+    "objectID": "additional_information/github_copilot.html",
+    "href": "additional_information/github_copilot.html",
+    "title": "AI integration to RStudio",
+    "section": "",
+    "text": "Many AI tools exist to support you in writing better, consistent code. As always, often this help is practical and functional, but the typical disclaimer applies: Trust but verify the output. Generative AI doesn’t have general intelligence but is only a model that has been trained on a lot of data. It is essential to review the suggestions to ensure they are accurate and correct.",
+    "crumbs": [
+      "More",
+      "AI integration to RStudio"
+    ]
+  },
+  {
+    "objectID": "additional_information/github_copilot.html#github-copilot",
+    "href": "additional_information/github_copilot.html#github-copilot",
+    "title": "AI integration to RStudio",
+    "section": "Github Copilot",
+    "text": "Github Copilot\n\nGitHub Copilot is an AI pair programmer that offers auto complete-style suggestions and real-time hints for the code you are writing by providing suggestions as “ghost text” based on the context of the surrounding code - GitHub Copilot docs\n\n\nConnect RStudio with Github\nTo use Github Copilot, you must have a Github account and an active subscription to Copilot. GitHub Copilot is free to use for verified students by signing up for the Student Developer Pack. To enable GitHub Copilot in RStudio, follow the simple steps outlined here.\n\n\nExample in RStudio\nCopilot offers auto complete-style suggestions (for R and Python) as you code as “ghost text”. This ghost-text is similar to the existing auto complete available in RStudio but, importantly, is a generated suggestion rather than an exact auto-completion. When coding in RStudio, Copilot’s suggestions will be presented as grey “ghost text.” You can accept those by pressing Tab.\n\nExample 1: Suppose you want to write a function that computes log returns based on a vector called prices. The following prompt already triggers a (correct) answer by Github Copilot\n\ncompute_log_returns &lt;- function(prices){\n\n\nHowever, for many other cases Copilot may offer wrong answers. For instance, try to have Copilot write a function which computes efficient tangency portfolio weights. Just based on a meaningful function name, Copilot does not seem to be able to complete the task. In such a case, comments can help to yield more useful prompts.\n\nExample 2: Suppose you have a question: Use a comment with a # Q: at the beginning and a question mark at the end.\n\n# Q: How do I compute the realized variance of stock returns?\n\n\n\nExample 3: Github Copilot also offers support for Python code.\n\n\n\nAdditional material\nhttps://docs.posit.co/ide/user/ide/guide/tools/copilot.html#using-copilot\nhttps://colorado.posit.co/rsc/rstudio-copilot/#/TitleSlide",
+    "crumbs": [
+      "More",
+      "AI integration to RStudio"
+    ]
+  },
+  {
+    "objectID": "additional_information/workflow_and_style.html",
+    "href": "additional_information/workflow_and_style.html",
+    "title": "Code style",
+    "section": "",
+    "text": "Good coding style is like correct spacing: you can manage without, butitsuremakesthingseaisertoread. :-)\nFollowing some general rules on code styles with R and Python makes it easier for you and collaborators to read, understand, and thus improve code.",
+    "crumbs": [
+      "More",
+      "Code style"
+    ]
+  },
+  {
+    "objectID": "additional_information/workflow_and_style.html#name-conventions",
+    "href": "additional_information/workflow_and_style.html#name-conventions",
+    "title": "Code style",
+    "section": "Name Conventions",
+    "text": "Name Conventions\nAs a fundamental guideline, opt for longer, descriptive names that offer clarity rather than opting for concise names for the sake of quick typing. While brief names may save minimal time during initial code composition, especially with autocomplete assistance, they can prove time-consuming when revisiting older code and attempting to decipher cryptic abbreviations.\n\n# Strive for:\nprices_high &lt;- prices |&gt; filter(adjusted &gt; 0.9)\n\n# Avoid:\nPRICESHIGH &lt;- prices |&gt; filter(adjusted &gt; 0.9)",
+    "crumbs": [
+      "More",
+      "Code style"
+    ]
+  },
+  {
+    "objectID": "additional_information/workflow_and_style.html#spaces",
+    "href": "additional_information/workflow_and_style.html#spaces",
+    "title": "Code style",
+    "section": "Spaces",
+    "text": "Spaces\nPut spaces on either side of mathematical operators apart from ^ (i.e. +, -, ==, &lt;, …), and around the assignment operator (&lt;-).\n\nRPython\n\n\n\na &lt;- 2\nb &lt;- 1\nd &lt;- 2\n# Strive for\nz &lt;- (a + b)^2 / d\n\n# Avoid\nz&lt;-(a+b)^2/d\n\n\n\n\na = 2\nb = 1\nd = 2\n\n# Strive for\nz = (a + b)**2 / d\n\n# Avoid\nz=(a+b)**2/d\n\n\n\n\nDon’t put spaces inside or outside parentheses for regular function calls. Always put a space after a comma, just like in standard English. This also valid for python.\n\n# Strive for}\nx &lt;- c(1, 2, 3, 4)\n\nmean(x, na.rm = TRUE)\n\n# Avoid\nmean (x ,na.rm=TRUE)",
+    "crumbs": [
+      "More",
+      "Code style"
+    ]
+  },
+  {
+    "objectID": "additional_information/workflow_and_style.html#pipes",
+    "href": "additional_information/workflow_and_style.html#pipes",
+    "title": "Code style",
+    "section": "Pipes",
+    "text": "Pipes\n|&gt; and . should always have a space before it and should typically be the last thing on a line. This makes it easier to add new steps, rearrange existing steps, modify elements within a step, and get a 10,000 ft view by skimming the verbs on the left-hand side.\n\nRPython\n\n\n\n# Strive for \nprices |&gt;  \n  filter(!is.na(date), !is.na(adjusted)) |&gt; \n  count(symbol)\n\n# Avoid\nprices|&gt;filter(!is.na(date), !is.na(adjusted))|&gt;count(symbol)\n\n\n\n\nimport pandas as pd\n\n# Strive for\n(prices\n  .query('not date.isna() and not adjusted.isna()')\n  .groupby('symbol')\n  .count()\n)\n\n# Avoid\nprices.query('not date.isna() and not adjusted.isna()').groupby('symbol').count()\n\n\n\n\nIf the function you’re chaining into has named arguments (e.g., mutate() or summarize() in R, or functions with named parameters in Python), it is beneficial to put each argument on a new line. This practice enhances readability, making it easier to add, rearrange, or modify elements within each step.\nHowever, if the function being chained does not have named arguments (e.g., select() or filter() in R, or functions without named parameters in Python), keeping everything on one line is acceptable. If it doesn’t fit on a single line, consider putting each argument on its own line for better visibility.\n\nRPython\n\n\n\n# Strive for\nprices |&gt;  \n  group_by(volume) |&gt; \n  summarize(\n    mean_adjusted = mean(adjusted, na.rm = TRUE),\n    n = n()\n  )\n\n# Avoid\nprices |&gt;\n  group_by(\n    volume\n  ) |&gt; \n  summarize(mean_adjusted = mean(adjusted, na.rm = TRUE), n = n())\n\n\n\n\n# Strive for\n(prices\n  .groupby('volume')\n  .agg(adjusted=('adjusted', 'mean'), n=('adjusted', 'size'))\n  .reset_index()\n)\n\n# Avoid\nprices.groupby('volume').agg(delay=('adjusted', 'mean'), n=('adjusted', 'size')).reset_index()\n\n\n\n\nAfter the first step of the pipeline, indent each line by two spaces. RStudio will automatically put the spaces in for you after a line break following a &gt; . If you’re putting each argument on its own line, indent by an extra two spaces. Make sure ) is on its own line, and un-indented to match the horizontal position of the function name.\n\nRPython\n\n\n\n# Strive for \nprices |&gt;  \n  group_by(volume) |&gt; \n  summarize(\n   mean_adjusted = mean(adjusted, na.rm = TRUE),\n    n = n()\n  )\n\n# Avoid\nprices|&gt;\n  group_by(volume) |&gt; \n  summarize(\n            mean_adjusted = mean(adjusted, na.rm = TRUE), \n             n = n()\n           )\n\n# Avoid\nprices|&gt;\n  group_by(volume) |&gt; \n  summarize(\n  mean_adjusted = mean(adjusted, na.rm = TRUE), \n  n = n()\n  )\n\n\n\n\n#Strive for\n\n(prices\n  .groupby('volume')\n  .agg(mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size'))\n  .reset_index()\n)\n\n# Avoid\n\n(prices\n  .groupby('volume')\n  .agg(\n   mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size'))\n  .reset_index()\n )",
+    "crumbs": [
+      "More",
+      "Code style"
+    ]
+  },
+  {
+    "objectID": "additional_information/workflow_and_style.html#ggplot2",
+    "href": "additional_information/workflow_and_style.html#ggplot2",
+    "title": "Code style",
+    "section": "ggplot2",
+    "text": "ggplot2\nThe same basic rules that apply to the pipe also apply to ggplot2; just treat + the same way as |&gt;\n\nPython\n\n\n\nimport pandas as pd\nfrom plotnine import ggplot, aes, geom_point, geom_line, labs\n\n prices[prices['volume'] &gt; 3000].\n   (ggplot(filtered_prices, aes(x='date', y='adjusted')) +\n   geom_point() +\n   geom_line() +\n   labs(x=\"Date\", y=\"Adjusted Price\", title=\"Adjusted Prices when Volume &gt; 3000\"))",
+    "crumbs": [
+      "More",
+      "Code style"
+    ]
+  },
+  {
+    "objectID": "additional_information/workflow_and_style.html#styler-packagefor-r",
+    "href": "additional_information/workflow_and_style.html#styler-packagefor-r",
+    "title": "Code style",
+    "section": "Styler package(for R)",
+    "text": "Styler package(for R)\nFirst install the styler package, restart R studio. Go to “Addins”, and click on “Set style”. Afterwards, select the code you want to style,go again to “Addins”, click on “Style selection”. Try with the code below:\n\n# Strive for\nz &lt;- (a + b)^2 / d\n\n# Avoid\nz &lt;- (a + b)^2/d\n\nNotice as the adjustment the styler package implements.",
+    "crumbs": [
+      "More",
+      "Code style"
+    ]
+  },
+  {
+    "objectID": "additional_information/workflow_and_style.html#pep8-packagefor-python",
+    "href": "additional_information/workflow_and_style.html#pep8-packagefor-python",
+    "title": "Code style",
+    "section": "PEP8 package(for Python)",
+    "text": "PEP8 package(for Python)\nAn equivalent tool in Python, known as PEP8, offers a different approach to code formatting. By executing the command autopep8 your_file_name.py --in-place --aggressive --verbose in the terminal, the code will be automatically adjusted to adhere to the PEP8 styling guidelines.\n\n# Strive for\nz = (a + b)**2 / d\n\n# Avoid\nz = (a + b)**2/d",
+    "crumbs": [
+      "More",
+      "Code style"
     ]
   },
   {
@@ -61,6 +187,7 @@
     "section": "",
     "text": "Accessing & managing financial data\nExercises:\n\nRead the book chapters Accessing & managing financial data and WRDS, CRSP, and Compustat entirely. If you prefer to read Python code, the chapters are available here and here. They may contain some advanced concepts but also a description of almost every important dataset relevant to research in empirical finance.\nConsult the material on Absalon on how to get the raw CRSP data as a KU student. Download the raw monthly CRSP data from the Bloomberg terminals in building 26 and follow the cleaning steps described in Downloading and Preparing CRSP (R and Python). To get more information on how to compute returns adjusted for delisting, follow the procedure described in Chapter 7.2 of the book Empirical Asset Pricing.\nDownload the files tidy_finance_r.sqlite and tidy_finance_python.sqlite from Absalon. Optimally you store it in the folder called data within your standard working directory for the course. Almost all exercises from now on will start with reading data out of this file, so make sure you familiarize yourself with this short minimal setup to load data into your R or Python session memory from a fresh session (you can consult it anytime again later during the course).\n\n\nFrom now on, all you need to do to access data that is stored in the database is to follow three steps: (i) Establish the connection to the SQLite database, (ii) call the table you want to extract, and (iii) collect the data. For your convenience, the following steps show all you need compactly.\n\n\nPythonR\n\n\n\nimport pandas as pd\nimport sqlite3\n\ntidy_finance = sqlite3.connect(\n  database=\"../data/tidy_finance_python.sqlite\"\n)\n\ncrsp_monthly = (pd.read_sql_query(\n  sql=(\"SELECT permno, month, industry, ret_excess \" \n       \"FROM crsp_monthly\"),\n  con=tidy_finance_python,\n  parse_dates={\"month\"})\n  .dropna()\n)\n\n\n\n\n    library(tidyverse)\n    library(RSQLite)\n    tidy_finance &lt;- dbConnect(SQLite(), \n                              \"../data/tidy_finance_r.sqlite\", \n                              extended_types = TRUE)\n    factors_ff_monthly &lt;- tbl(tidy_finance, \"factors_ff3_monthly\") \n    factors_ff_monthly &lt;- factors_ff_monthly |&gt; collect()\n\n\n\n\n\nAs always (but this is important): If you need help with the SQL database, post your question on Absalon. Your TA, your peers, and I will help you!\nReplicate the following two figures provided in the lecture slides: i) Create a time series of the number of stocks in the CRSP sample, which are listed on NASDAQ, NYSE, and AMEX. ii) Illustrate the time series of total market values (inflation-adjusted) based on industry classification siccd. The book Empirical Asset Pricing (Bali, Murrey, and Engle) provides a detailed walk-through if you need help.\n\nSolutions: All solutions are provided in the book chapter WRDS, CRSP, and Compustat (R version and Python version) and the lecture slides.",
     "crumbs": [
+      "Exercises",
       "Asset Pricing",
       "Accessing & managing financial data"
     ]
@@ -72,6 +199,7 @@
     "section": "",
     "text": "The main aim of this chapter is to familiarize yourself with tidy coding principles. We start by downloading and visualizing stock data before we move to a simple portfolio choice problem. These examples introduce you to our approach of Tidy Finance.",
     "crumbs": [
+      "Exercises",
       "Introduction",
       "Introduction to Tidy Finance"
     ]
@@ -83,6 +211,7 @@
     "section": "Working with stock market data",
     "text": "Working with stock market data\nExercises:\n\nDownload daily prices for one stock market ticker of your choice (e.g. AAPL) from Yahoo!Finance. Plot the time series of adjusted closing prices. To download the data with R you can use the command tq_get from the tidyquant package. If you do not know how to use it, make sure you read the help file by calling ?tq_get. I especially recommended taking a look at the examples section in the documentation. For Python, you may want to inspect the documentation of the yfinance package.\nCompute daily net returns for the asset and visualize the distribution of daily returns in a histogram using ggplot2 (R) or plotnine (Python). Also, use geom_vline() to add a dashed red line that indicates the 5% quantile of the daily returns within the histogram.\nCompute summary statistics (mean, standard deviation, minimum and maximum) for the daily returns.\n\nSolutions: All tasks are solved and described in detail in Chapter 1.1 in Tidy Finance with R. For a Python version of the code, consult Chapter 1.1 in Tidy Finance with Python",
     "crumbs": [
+      "Exercises",
       "Introduction",
       "Introduction to Tidy Finance"
     ]
@@ -94,6 +223,7 @@
     "section": "Scaling up the analysis",
     "text": "Scaling up the analysis\nAs a next step, we generalize the code from before such that all the computations can handle an arbitrary vector of tickers (e.g., all constituents of an index). Following tidy principles, it is quite easy to download the data, plot the price time series, and tabulate the summary statistics for an arbitrary number of assets.\nExercises:\n\nNow the tidyverse magic starts: Take your code from before and generalize it such all the computations are performed for an arbitrary vector of tickers (e.g., ticker &lt;- c(\"AAPL\", \"MMM\", \"BA\") (R) or ticker = [\"AAPL\", \"MMM\", \"BA\"] (Python)). You can also call ticker &lt;- tq_index(\"DOW\") (R) to get daily data from all constituents of the Dow Jones index. Automate the download, the plot of the price time series, and create a table of return summary statistics for this arbitrary number of assets.\nConsider the research question Are days with high aggregate trading volume often followed by high aggregate trading volume days? How would you investigate this question? Hint: Compute the aggregate daily trading volume (in USD) and find an appropriate visualization to analyze the question.\n\nSolutions: All tasks are solved and described in detail in Tidy Finance with R in the Chapters Scaling up the analysis and Other forms of data aggregation and in Tidy with Python in the Chapters Scaling up the analysis and Other forms of data aggregation.",
     "crumbs": [
+      "Exercises",
       "Introduction",
       "Introduction to Tidy Finance"
     ]
@@ -105,6 +235,7 @@
     "section": "Portfolio choice problems",
     "text": "Portfolio choice problems\nExercises:\n\nCompute monthly returns from all adjusted daily Dow Jones constituent prices. Hint for Python users: You can download the constituents of the Dow Jones 30 index from this homepage.\nCompute the vector of historical average returns and the sample variance-covariance matrix.\nCompute the minimum variance portfolio weights and the portfolio volatility and average returns.\nVisualize the mean-variance efficient frontier. For that, first, compute the efficient portfolio for an arbitrary risk-free rate (below the average return of the minimum variance portfolio). Then use the two-fund separation theorem to compute the location of a grid of combinations of the minimum variance portfolio and the efficient portfolio on the mean-volatility diagram which has (annualized) volatility on the \\(x\\) axis and (annualized) expected returns on the \\(y\\) axis. Indicate the location of the individual assets on the mean-volatility diagram as well.\n\nSolutions: All tasks are solved and described in detail in Tidy Finance with R and Tidy Finance with Python, in the Chapters Portfolio Choice Problems and The Efficient Frontier.",
     "crumbs": [
+      "Exercises",
       "Introduction",
       "Introduction to Tidy Finance"
     ]
@@ -116,6 +247,7 @@
     "section": "Equivalence between Certainty equivalent maximization and minimum variance optimization",
     "text": "Equivalence between Certainty equivalent maximization and minimum variance optimization\nIn the lecture slides (Parameter uncertainty), I argue that an investor with a quadratic utility function with a certainty equivalent \\[\\max_w CE(w) = \\omega'\\mu - \\frac{\\gamma}{2} \\omega'\\Sigma \\omega \\text{ s.t. } \\iota'\\omega = 1\\] faces an equivalent optimization problem to a framework where portfolio weights are chosen to minimize volatility given a pre-specified level or expected returns \\[\\min_w \\omega'\\Sigma \\omega \\text{ s.t. } \\omega'\\mu = \\bar\\mu \\text{ and } \\iota'\\omega = 1\\] Note the differences: In the first case, the investor has a (known) risk aversion \\(\\gamma\\) which determines her optimal balance between risk (\\(\\omega'\\Sigma\\omega)\\) and return (\\(\\mu'\\omega\\)). In the second case, the investor has a target return she wants to achieve while minimizing the volatility. Intuitively, both approaches are closely connected if we consider that the risk aversion \\(\\gamma\\) determines the desirable return \\(\\bar\\mu\\). More risk-averse investors (higher \\(\\gamma\\)) will choose a lower target return to keep their volatility level down. The efficient frontier then spans all possible portfolios depending on the risk aversion \\(\\gamma\\), starting from the minimum variance portfolio (\\(\\gamma = \\infty\\)).\nExercises:  Proof that the optimal portfolio weights are equivalent in both cases.\nSolutions: The proofs are provided in the Appendix of Tidy Finance with R.",
     "crumbs": [
+      "Exercises",
       "Introduction",
       "Introduction to Tidy Finance"
     ]
