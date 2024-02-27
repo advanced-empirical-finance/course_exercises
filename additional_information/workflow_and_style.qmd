@@ -156,16 +156,14 @@ In Python
 
 # Strive for
 prices.groupby('volume') \
-                       .agg(adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
-                       .reset_index()
+      .agg(adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
+      .reset_index()
 
 # Avoid
-prices.groupby('volume').agg(delay=('adjusted', 'mean'), n=('adjusted', 'size')).reset_index()
-
-
-
-
-
+prices.groupby(
+      'volume') \
+     .agg(adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
+     .reset_index()
 ```
 :::
 
@@ -210,7 +208,8 @@ In Python
 #Strive
 
 prices.groupby('volume') \
-              .agg(mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
+              .agg(
+                mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
               .reset_index()
 
 # Avoid
@@ -225,9 +224,9 @@ prices.groupby('volume') \
 
 # Avoid
 prices.groupby('volume') \
-              .agg(
-               mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
-              .reset_index()
+        .agg(
+         mean_adjusted=('adjusted', 'mean'), n=('adjusted', 'size')) \
+        .reset_index()
 
 
 
@@ -254,11 +253,13 @@ prices |>
 import pandas as pd
 from plotnine import ggplot, aes, geom_point, geom_line, labs
 
- prices[prices['volume'] > 3000].
-   (ggplot(filtered_prices, aes(x='date', y='adjusted')) +
-   geom_point() +
-   geom_line() +
-   labs(x="Date", y="Adjusted Price", title="Adjusted Prices when Volume > 3000"))
+filtered_prices = prices[prices['volume'] > 3000]
+
+(ggplot(filtered_prices, aes(x='date', y='adjusted')) +
+ geom_point() +
+ geom_line() +
+ labs(x="Date", y="Adjusted Price", title="Adjusted Prices when Volume > 3000"))
+
 
 
 
