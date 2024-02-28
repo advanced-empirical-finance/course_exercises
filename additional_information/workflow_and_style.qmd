@@ -249,17 +249,16 @@ prices |>
 ```
 
 ```{python}
-
 import pandas as pd
-from plotnine import ggplot, aes, geom_point, geom_line, labs
+from plotnine import ggplot, aes, geom_point, geom_line, labs, theme_minimal
 
 filtered_prices = prices[prices['volume'] > 3000]
 
 (ggplot(filtered_prices, aes(x='date', y='adjusted')) +
  geom_point() +
- geom_line() +
- labs(x="Date", y="Adjusted Price", title="Adjusted Prices when Volume > 3000"))
-
+ geom_line(aes(group=1)) +  # Specify a grouping variable to avoid warning
+ labs(x="Date", y="Adjusted Price", title="Adjusted Prices when Volume > 3000") +
+ theme_minimal())
 
 
 
@@ -278,6 +277,7 @@ z <- (a + b)^2 / d
 
 # Avoid
 z <- (a + b)^2/d
+
 ```
 
 Notice as the "Avoid" now resembles "Strive"
