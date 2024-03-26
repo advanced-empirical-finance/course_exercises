@@ -26,7 +26,10 @@ website:
             - asset_pricing.qmd
         - section: "Machine Learning"
           contents:
+            - gu_kelly_xiu.qmd
             - machine_learning.qmd
+            - machine_learning_nonlinear.qmd
+
     
     - title: "More"
       contents:

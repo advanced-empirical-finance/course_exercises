@@ -1,162 +1,162 @@
 ---
-title: "Machine Learning 1: Shrinkage Estimation"
+title: "Shrinkage Estimation"
 ---
 
-<!-- In these exercises, you familiarize yourself with the details behind shrinkage regression methods such as Ridge and Lasso. Although *R* and *Python* provide amazing interfaces which perform the estimation flawlessly, you are first asked to implement Ridge and Lasso regression estimators from scratch before moving on to using the package *glmnet* next.  -->
+In these exercises, you familiarize yourself with the details behind shrinkage regression methods such as Ridge and Lasso. Although *R* and *Python* provide amazing interfaces which perform the estimation flawlessly, you are first asked to implement Ridge and Lasso regression estimators from scratch before moving on to using the package *glmnet* next.
 
-<!-- ## Introduction to penalized regressions  -->
+## Introduction to penalized regressions
 
-<!-- **Exercises:** -->
+**Exercises:**
 
-<!-- - Load the file `macro_predictors` from the `tidy_finance_*.sqlite`database. Create a variable `y`that contains the market excess returns from the Goyal-Welsh dataset (`rp_div`) and a matrix `X` that contains the remaining macroeconomic variables except for the column `month`. You will use `X` and `y` to perform penalized regressions. Try to run a simple linear regression of `X` on `y´ to analyze the relationship between the macroeconomic variables and market returns. Which problems do you encounter? -->
-<!-- - Write a function that requires three inputs, `y` (a $T$ vector), `X` (a $(T \times K)$ matrix), and `lambda` and which returns the **Ridge** estimator (a $K$ vector) for given penalization parameter $\lambda$. Recall that the intercept should not be penalized. Therefore, your function should allow you to indicate whether $X$ contains a vector of ones as the first column which should be exempt from the $L_2$ penalty. -->
-<!-- - Compute the $L_2$ norm ($\beta'\beta$) for the regression coefficients based on the predictive regression from the previous exercise for a range of $\lambda$'s and illustrate the effect of the penalization in a suitable figure. -->
-<!-- - Now, write a function that requires three inputs, `y` (a $T$ vector), `X` (a $(T \times K)$ matrix), and 'lambda` and which returns the **Lasso** estimator (a $K$ vector) for given penalization parameter $\lambda$. Recall that the intercept should not be penalized. Therefore, your function should allow you to indicate whether $X$ contains a vector of ones as the first column which should be exempt from the $L_1$ penalty. -->
-<!-- - After you are sure you understand what Ridge and Lasso regression are doing, familiarize yourself with the documentation of the package `glmnet()`. It is a thoroughly tested and well-established package that provides efficient code to compute the penalized regression coefficients not only for Ridge and Lasso but also for combinations, therefore, commonly called *elastic nets*.  -->
+- Load the file `macro_predictors` from the `tidy_finance_*.sqlite`database. Create a variable `y`that contains the market excess returns from the Goyal-Welsh dataset (`rp_div`) and a matrix `X` that contains the remaining macroeconomic variables except for the column `month`. You will use `X` and `y` to perform penalized regressions. Try to run a simple linear regression of `X` on `y´ to analyze the relationship between the macroeconomic variables and market returns. Which problems do you encounter?
+- Write a function that requires three inputs, `y` (a $T$ vector), `X` (a $(T \times K)$ matrix), and `lambda` and which returns the **Ridge** estimator (a $K$ vector) for given penalization parameter $\lambda$. Recall that the intercept should not be penalized. Therefore, your function should allow you to indicate whether $X$ contains a vector of ones as the first column which should be exempt from the $L_2$ penalty.
+- Compute the $L_2$ norm ($\beta'\beta$) for the regression coefficients based on the predictive regression from the previous exercise for a range of $\lambda$'s and illustrate the effect of the penalization in a suitable figure.
+- Now, write a function that requires three inputs, `y` (a $T$ vector), `X` (a $(T \times K)$ matrix), and 'lambda` and which returns the **Lasso** estimator (a $K$ vector) for given penalization parameter $\lambda$. Recall that the intercept should not be penalized. Therefore, your function should allow you to indicate whether $X$ contains a vector of ones as the first column which should be exempt from the $L_1$ penalty.
+- After you are sure you understand what Ridge and Lasso regression are doing, familiarize yourself with the documentation of the package `glmnet()`. It is a thoroughly tested and well-established package that provides efficient code to compute the penalized regression coefficients not only for Ridge and Lasso but also for combinations, therefore, commonly called *elastic nets*.
 
-<!-- **Solutions: ** -->
+**Solutions: **
 
-<!-- ```{r} -->
-<!-- # Load required packages -->
-<!-- library(RSQLite) -->
-<!-- library(tidyverse) -->
+```{r}
+# Load required packages
+library(RSQLite)
+library(tidyverse)
 
-<!-- # Read in the data -->
-<!-- tidy_finance <- dbConnect(SQLite(), -->
-<!--   "../data/tidy_finance.sqlite", -->
-<!--   extended_types = TRUE -->
-<!-- ) -->
+# Read in the data
+tidy_finance <- dbConnect(SQLite(),
+  "../AEF_2024/data/tidy_finance_r.sqlite",
+  extended_types = TRUE
+)
 
-<!-- macro_predictors <- tbl(tidy_finance, "macro_predictors") |> -->
-<!--   collect() -->
+macro_predictors <- tbl(tidy_finance, "macro_predictors") |>
+  collect()
 
-<!-- y <- macro_predictors$rp_div -->
-<!-- X <- macro_predictors |> -->
-<!--   select(-month, -rp_div) |> -->
-<!--   as.matrix() -->
+y <- macro_predictors$rp_div
+X <- macro_predictors |>
+  select(-month, -rp_div) |>
+  as.matrix()
 
-<!-- # OLS for Welsh data fails because X is not of full rank -->
-<!-- c(ncol(X), Matrix::rankMatrix(X)) -->
-<!-- ``` -->
+# OLS for Welsh data fails because X is not of full rank
+c(ncol(X), Matrix::rankMatrix(X))
+```
 
-<!-- As for OLS, the objective function is to minimize the sum of squared errors $(y - X\beta)'(y - X\beta)$ under the condition that $\sum\limits_{j=2}^K \beta_j \leq t(\lambda)$ **if** an intercept is present. This can be rewritten as $\beta'A\beta \leq t(\lambda)$ where $A = \begin{pmatrix}0&&\ldots&&0\\\vdots& 1&0&\ldots&0\\&\vdots&\ddots&&0\\0& &\ldots&&1\end{pmatrix}$. Otherwise, the condition is simply that $\beta'I_K\beta \leq t(\lambda)$ where $I_k$ is an identity matrix of size ($k \times k$).  -->
-<!-- ```{r} -->
-<!-- ridge_regression <- function(y, X, lambda = 0, intercept = FALSE) { -->
-<!--   K <- ncol(X) -->
-<!--   A <- diag(K) -->
-<!--   if (intercept) { -->
-<!--     A[1, ] <- 0 -->
-<!--   } -->
-<!--   coeffs <- solve(t(X) %*% X + lambda * A) %*% t(X) %*% y -->
-<!--   return(coeffs) -->
-<!-- } -->
-<!-- ``` -->
+As for OLS, the objective function is to minimize the sum of squared errors $(y - X\beta)'(y - X\beta)$ under the condition that $\sum\limits_{j=2}^K \beta_j \leq t(\lambda)$ **if** an intercept is present. This can be rewritten as $\beta'A\beta \leq t(\lambda)$ where $A = \begin{pmatrix}0&&\ldots&&0\\\vdots& 1&0&\ldots&0\\&\vdots&\ddots&&0\\0& &\ldots&&1\end{pmatrix}$. Otherwise, the condition is simply that $\beta'I_K\beta \leq t(\lambda)$ where $I_k$ is an identity matrix of size ($k \times k$).
+```{r}
+ridge_regression <- function(y, X, lambda = 0, intercept = FALSE) {
+  K <- ncol(X)
+  A <- diag(K)
+  if (intercept) {
+    A[1, ] <- 0
+  }
+  coeffs <- solve(t(X) %*% X + lambda * A) %*% t(X) %*% y
+  return(coeffs)
+}
+```
 
-<!-- Below, I apply the function to the data set from the previous exercise to illustrate the output of the function `ridge_regression()`.   -->
-<!-- ```{r}  -->
-<!-- rc <- c(NA, ridge_regression(y, X, lambda = 1)) -->
+Below, I apply the function to the data set from the previous exercise to illustrate the output of the function `ridge_regression()`.
+```{r}
+rc <- c(NA, ridge_regression(y, X, lambda = 1))
 
-<!-- # Add an intercept term -->
-<!-- rc_i <- ridge_regression(y, cbind(1, X), lambda = 1, intercept = TRUE) -->
-<!-- cbind(rc, rc_i) -->
-<!-- ``` -->
+# Add an intercept term
+rc_i <- ridge_regression(y, cbind(1, X), lambda = 1, intercept = TRUE)
+cbind(rc, rc_i)
+```
 
-<!-- Finally, the following code sequence computes the $L_2$ norm of the ridge regression coefficients for a given $\lambda$. Note that to implement this evaluation in a tidy manner, vectorized functions are important! `R` provides great ways to vectorize a function, to learn more, Hadley Wickham's book [Advanced R](https://adv-r.hadley.nz/) is a highly recommended read! -->
+Finally, the following code sequence computes the $L_2$ norm of the ridge regression coefficients for a given $\lambda$. Note that to implement this evaluation in a tidy manner, vectorized functions are important! `R` provides great ways to vectorize a function, to learn more, Hadley Wickham's book [Advanced R](https://adv-r.hadley.nz/) is a highly recommended read!
 
-<!-- ```{r} -->
+```{r}
 
-<!-- l2_norm <- function(lambda) sum(ridge_regression(y = y, X = X, lambda = lambda)^2) # small helper function to extract the L_2 norm of the ridge regression coefficients -->
+l2_norm <- function(lambda) sum(ridge_regression(y = y, X = X, lambda = lambda)^2) # small helper function to extract the L_2 norm of the ridge regression coefficients
 
-<!-- l2_norm <- Vectorize(l2_norm) # To use the function within a `mutate` operation, it needs to be vectorized -->
+l2_norm <- Vectorize(l2_norm) # To use the function within a `mutate` operation, it needs to be vectorized
 
-<!-- seq(from = 0.01, to = 20, by = 0.1) |> -->
-<!--   as_tibble() |> -->
-<!--   mutate(norm = l2_norm(value)) |> -->
-<!--   ggplot(aes(x = value, y = norm)) + -->
-<!--   geom_line() + -->
-<!--   labs(x = "Lambda", y = " L2 norm") -->
-<!-- ``` -->
+seq(from = 0.01, to = 20, by = 0.1) |>
+  as_tibble() |>
+  mutate(norm = l2_norm(value)) |>
+  ggplot(aes(x = value, y = norm)) +
+  geom_line() +
+  labs(x = "Lambda", y = " L2 norm")
+```
 
-<!-- To compute the coefficients of linear regression with a penalty on the sum of the absolute value of the regression coefficients, numerical optimization routines are required. Recall, the objective function is to minimize the sum of squared residuals, $\hat\varepsilon'\hat\varepsilon$ under the constraint that $\sum\limits_{j=2}^K\beta_j\leq t(\lambda)$. Make sure you familiarize yourself with the way, numerical optimization in R works: we first define the objective function (`objective_lasso()`) which has the parameter we aim to optimize as its first argument. The main function `lasso_regression()` then only calls this helper function.  -->
-<!-- ```{r} -->
-<!-- objective_lasso <- function(beta, y, X, lambda, intercept) { -->
-<!--   residuals <- y - X %*% beta -->
-<!--   sse <- sum(residuals^2) -->
-<!--   penalty <- sum(abs(beta)) -->
-<!--   if (intercept) { -->
-<!--     penalty <- penalty - abs(beta[1]) -->
-<!--   } -->
-<!--   return(sse + lambda * penalty) -->
-<!-- } -->
+To compute the coefficients of linear regression with a penalty on the sum of the absolute value of the regression coefficients, numerical optimization routines are required. Recall, the objective function is to minimize the sum of squared residuals, $\hat\varepsilon'\hat\varepsilon$ under the constraint that $\sum\limits_{j=2}^K\beta_j\leq t(\lambda)$. Make sure you familiarize yourself with the way, numerical optimization in R works: we first define the objective function (`objective_lasso()`) which has the parameter we aim to optimize as its first argument. The main function `lasso_regression()` then only calls this helper function.
+```{r}
+objective_lasso <- function(beta, y, X, lambda, intercept) {
+  residuals <- y - X %*% beta
+  sse <- sum(residuals^2)
+  penalty <- sum(abs(beta))
+  if (intercept) {
+    penalty <- penalty - abs(beta[1])
+  }
+  return(sse + lambda * penalty)
+}
 
-<!-- lasso_regression <- function(y, X, lambda = 0, intercept = FALSE) { -->
-<!--   K <- ncol(X) -->
-<!--   beta_init <- rep(0, K) -->
-<!--   return(optim(par = beta_init, fn = objective_lasso, y = y, X = X, lambda = lambda, intercept = intercept)$par) -->
-<!-- } -->
+lasso_regression <- function(y, X, lambda = 0, intercept = FALSE) {
+  K <- ncol(X)
+  beta_init <- rep(0, K)
+  return(optim(par = beta_init, fn = objective_lasso, y = y, X = X, lambda = lambda, intercept = intercept)$par)
+}
 
-<!-- rc <- c(NA, lasso_regression(y, X, lambda = 0.01)) -->
+rc <- c(NA, lasso_regression(y, X, lambda = 0.01))
 
-<!-- # Add an intercept term -->
-<!-- rc_i <- lasso_regression(y, cbind(1, X), lambda = 0.01, intercept = TRUE) -->
-<!-- cbind(rc, rc_i) -->
-<!-- ``` -->
-<!-- Finally, as in the previous example with Ridge regression, I illustrate how a larger penalization term $\lambda$ affects the $L_1$ norm of the regression coefficients. -->
-<!-- ```{r l1-regression} -->
+# Add an intercept term
+rc_i <- lasso_regression(y, cbind(1, X), lambda = 0.01, intercept = TRUE)
+cbind(rc, rc_i)
+```
+Finally, as in the previous example with Ridge regression, I illustrate how a larger penalization term $\lambda$ affects the $L_1$ norm of the regression coefficients.
+```{r l1-regression}
 
-<!-- l1_norm <- function(lambda) sum(abs(lasso_regression(y = y, X = X, lambda = lambda))) -->
-<!-- l1_norm <- Vectorize(l1_norm) # To use the function within a `mutate` operation, it needs to be vectorized -->
+l1_norm <- function(lambda) sum(abs(lasso_regression(y = y, X = X, lambda = lambda)))
+l1_norm <- Vectorize(l1_norm) # To use the function within a `mutate` operation, it needs to be vectorized
 
-<!-- seq(from = 0, to = 0.5, by = 0.05) |> -->
-<!--   as_tibble() |> -->
-<!--   mutate(norm = l1_norm(value)) |> -->
-<!--   ggplot(aes(x = value, y = norm)) + -->
-<!--   geom_line() + -->
-<!--   labs(x = "Lambda", y = " L1 norm") -->
-<!-- ``` -->
+seq(from = 0, to = 0.5, by = 0.05) |>
+  as_tibble() |>
+  mutate(norm = l1_norm(value)) |>
+  ggplot(aes(x = value, y = norm)) +
+  geom_line() +
+  labs(x = "Lambda", y = " L1 norm")
+```
 
-<!-- While the code above should work, there are well-tested R packages available that provide a much more reliable and faster implementation. Thus, you can safely use the package `glmnet`. As a first step, the following code create the sequence of regressions coefficients for the Goyal-Welch dataset which should be identical to the example we discussed in the lecture slides. -->
+While the code above should work, there are well-tested R packages available that provide a much more reliable and faster implementation. Thus, you can safely use the package `glmnet`. As a first step, the following code create the sequence of regressions coefficients for the Goyal-Welch dataset which should be identical to the example we discussed in the lecture slides.
 
-<!-- ```{r} -->
-<!-- library(glmnet) -->
-<!-- # Lasso and Ridge regression -->
+```{r}
+library(glmnet)
+# Lasso and Ridge regression
 
-<!-- fit_ridge <- glmnet(X, y, # Model -->
-<!--   alpha = 0 -->
-<!-- ) -->
+fit_ridge <- glmnet(X, y, # Model
+  alpha = 0
+)
 
-<!-- broom::tidy(fit_ridge) |> -->
-<!--   filter(term != "(Intercept)") |> -->
-<!--   ggplot(aes(x = lambda, y = estimate, color = term)) + -->
-<!--   geom_line() + -->
-<!--   geom_hline(data = broom::tidy(fit_ridge) |>  -->
-<!--                filter(lambda == min(lambda)),  -->
-<!--              aes(yintercept = estimate, color = term), linetype = "dotted") + -->
-<!--   theme_minimal() + -->
-<!--   scale_x_log10() + -->
-<!--   labs(x = "Lambda", y = "Estimate") -->
-<!-- ``` -->
+broom::tidy(fit_ridge) |>
+  filter(term != "(Intercept)") |>
+  ggplot(aes(x = lambda, y = estimate, color = term)) +
+  geom_line() +
+  geom_hline(data = broom::tidy(fit_ridge) |>
+               filter(lambda == min(lambda)),
+             aes(yintercept = estimate, color = term), linetype = "dotted") +
+  theme_minimal() +
+  scale_x_log10() +
+  labs(x = "Lambda", y = "Estimate")
+```
 
-<!-- Note the function argument `alpha`. `glmnet()` allows a more flexible combination of $L_1$ and $L_2$ penalization on the regression coefficients. The *pure* ridge estimation is implemented with `alpha = 0`, lasso requires `alpha = 1`.  -->
+Note the function argument `alpha`. `glmnet()` allows a more flexible combination of $L_1$ and $L_2$ penalization on the regression coefficients. The *pure* ridge estimation is implemented with `alpha = 0`, lasso requires `alpha = 1`.
 
-<!-- ```{r} -->
-<!-- fit_lasso <- glmnet(X, y, # Model -->
-<!--   alpha = 1 -->
-<!-- ) -->
+```{r}
+fit_lasso <- glmnet(X, y, # Model
+  alpha = 1
+)
 
-<!-- broom::tidy(fit_lasso) |> -->
-<!--   filter(term != "(Intercept)") |> -->
-<!--   ggplot(aes(x = lambda, y = estimate, color = term)) + -->
-<!--   geom_line() + -->
-<!--   geom_hline(data = broom::tidy(fit_ridge) |>  -->
-<!--                filter(lambda == min(lambda)),  -->
-<!--              aes(yintercept = estimate, color = term), linetype = "dotted") + -->
-<!--   theme_minimal() + -->
-<!--   scale_x_log10() + -->
-<!--   labs(x = "Lambda", y = "Estimate") -->
-<!-- ``` -->
+broom::tidy(fit_lasso) |>
+  filter(term != "(Intercept)") |>
+  ggplot(aes(x = lambda, y = estimate, color = term)) +
+  geom_line() +
+  geom_hline(data = broom::tidy(fit_ridge) |>
+               filter(lambda == min(lambda)),
+             aes(yintercept = estimate, color = term), linetype = "dotted") +
+  theme_minimal() +
+  scale_x_log10() +
+  labs(x = "Lambda", y = "Estimate")
+```
 
-<!-- Note in the figure how Lasso discards all variables for high values of $\lambda$ and then gradually incorporates more predictors. It seems like stock variance is selected first. As expected, for $\lambda \rightarrow 0$, the lasso coefficients converge towards the OLS estimates (illustrated with dotted lines).  -->
+Note in the figure how Lasso discards all variables for high values of $\lambda$ and then gradually incorporates more predictors. It seems like stock variance is selected first. As expected, for $\lambda \rightarrow 0$, the lasso coefficients converge towards the OLS estimates (illustrated with dotted lines).
 
 ## Factor selection via machine learning
 
@@ -185,3 +185,5 @@ In this Chapter, you get to know `tidymodels` (R) and `scikit-learn` (Python), a
 
 **Solutions: **
 All solutions are provided in the book chapter *Factor selection via machine learning* ([R](https://www.tidy-finance.org/r/factor-selection-via-machine-learning.html) or [Python](https://www.tidy-finance.org/python/factor-selection-via-machine-learning.html) version).
+
+

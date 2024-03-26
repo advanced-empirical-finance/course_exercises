@@ -1,0 +1,24 @@
+---
+title: "Neural networks"
+---
+
+# Machine Learning 2: Random Forests and (deep) neural networks
+
+In this exercise set you familiarize yourself with the inner working of `tidymodels` (`scikit-learn` for Python) and `torch` for deep neural networks.
+
+You will apply well-known methods such as random forests and neural networks to a simple application in option pricing. More specifically, we are going to create an artificial dataset of option prices for different values based on the Black-Scholes pricing equation for call options. Then, we train different models to learn how to price call options without prior knowledge of the theoretical underpinnings of the famous option pricing equation.
+
+**Exercises: **
+
+- Simulate prices for Call options based on a grid of different combinations of times to maturity (`T`), risk-free rates (`r`), volatilities (`sigma`), strike prices (`K`), and current stock prices (`S`). Compute the Black-Scholes option price for each combination of your grid. 
+- Add an idiosyncratic error term to each observation such that the prices considered do not exactly reflect the values implied by the Black-Scholes equation.
+- Split the data into a training set (which contains some of the *observed* option prices) and a test set that will only be used for the final evaluation
+- Create a `recipe` which normalizes all predictors to have zero mean and unit standard deviation.
+- Fit a neural network with one hidden layer on the training data. 
+- Fit a random forest (`rand_forest`) on the training data. 
+- Figure out how you create a deep neural network which predicts option prices from the set of input parameters. Figure out how to set the activation function, the number of neurons per layer and compile the model. 
+- Fit the deep neural network with the *pre-processed* training data 
+- Evaluate the predictive performance of your competing model. Which model performed best in the test sample to predict option prices? 
+
+**Solutions: **
+All solutions are provided in the book chapter [Option pricing via machine learning (R version)](https://tidy-finance.org/r/option-pricing-via-machine-learning.html) or [Option pricing via machine learning (Python version)](https://tidy-finance.org/r/option-pricing-via-machine-learning.html)

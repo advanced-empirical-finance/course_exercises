@@ -1,0 +1,104 @@
+---
+title: "Empirical Asset Pricing via Machine Learning"
+eval: false
+---
+
+This exercise should help you to fight your way through an actual academic application of machine learning methods in asset pricing. The exercise guides you step-by-step to replicate the empirical framework and, therefore, at some point also the main results of the paper [Empirical Asset Pricing via Machine Learning](https://academic.oup.com/rfs/article/33/5/2223/5758276) by Shihao Gu, Bryan Kelly, and Dacheng Xiu. 
+
+**Exercises: **
+
+- Start reading the paper from Section 2 ("An empirical study of U.S. equities"). In their study, the authors aim to use different machine learning procedures to approximate the overarching empirical model $E_t\left(r_{i, t+1}\right) = g^\star(z_{i,t})$ as defined in the paper. The returns are monthly total individual equity returns from CRSP for all firms listed in the NYSE, AMEX, and NASDAQ. The sample starts in March 1957 (the start date of the S&P 500) and ends in December 2016, totaling 60 years. *Prepare* the data from CRSP according to these requirements. 
+- One significant contribution of the paper is implementing the predictive framework with a vast collection of stock-level predictive characteristics based on the cross-section of stock returns literature. Table A.6 in the Internet Appendix details all these characteristics. You do not have to generate each of the characteristics. Instead *download* the data from [Dacheng Xiu's homepage](https://dachxiu.chicagobooth.edu/download/datashare.zip).
+- Read the *readme* file and process the data the way the authors explain it in footnote 29 of the paper: "We cross-sectionally rank all stock characteristics period-by-period and map these ranks into the [-1,1] interval following Kelly, Pruitt, and Su (2019) and Freyberger, Neuhierl, and Weber (2020)." 
+- Merge the dataset with the CRSP file and the macroeconomic predictors following the variable definitions detailed in Welch and Goyal (2008). (Hint: the macroeconomic variables are part of the `tidy_finance_*.sqlite` database, consult Chapter 2 for more information).
+- Replace missing values with the cross-sectional median at each month for each stock
+- Then, *process* the column `sic2', which currently contains categorical data and which should be transformed into a matrix with 74 columns: The values in the cells should be one if the 'permno' corresponds to the specific industry classification and 0 otherwise
+- In the original paper, the authors inflate the dataset by considering any possible interaction between macroeconomic variables and firm characteristics. How could you implement this? (*Note: the dataset is enormous already without interaction terms. For this lecture, feel free to skip this final step.*)
+
+**Solutions (R version, Python updated soon) **
+
+```{r}
+library(tidyverse)
+library(RSQLite)
+library(lubridate)
+library(archive)
+```
+
+First, we download the (large) dataset directly from within R. The data is stored as a .csv file within a zipped folder. For such purposes, the `archive` package is useful. Presumably, you want to store the output in a `.sqlite` file, for instance, the file `tidy_finance_*.sqlite` or in a new file. Next, we set `options(timeout = 200)`, which allows the R session to download the dataset for 200 seconds. The default in R is 60 seconds which was too short on my machine. 
+
+```{r}
+options(timeout = 200)
+characteristics <- read_csv(archive_read("https://dachxiu.chicagobooth.edu/download/datashare.zip", file = "datashare.csv"))
+
+characteristics <- characteristics |>
+  rename("month" = "DATE") |>
+  mutate(
+    month = ymd(month),
+    month = floor_date(month, "month")
+  ) |>
+  rename_with(~ paste0("characteristic_", .), -c(permno, month, sic2))
+```
+
+The cross-sectional ranking may be time-consuming. The idea is that at each date, the cross-section of each predictor should be scaled such that the maximum value is one and the minimum value is -1. The function below explicitly handles `NA` values, so they do not tamper with the ranking. 
+```{r}
+rank_transform <- function(x) {
+  rx <- rank(x, na.last = TRUE)
+  non_nas <- sum(!is.na(x))
+  rx[rx > non_nas] <- NA
+  2 * ((rx - min(rx, na.rm = TRUE)) / (max(rx, na.rm = TRUE) - min(rx, na.rm = TRUE)) - 0.5)
+}
+
+characteristics <- characteristics |>
+  group_by(month) |>
+  mutate(across(contains("characteristic"), rank_transform))
+```
+
+Next, merge the data with monthly CRSP data to get excess returns. To create portfolio sorts based on the predictions, `mktcap_lag` remains in the sample. As a final step, we also include the macroeconomic predictor variables.
+```{r}
+tidy_finance <- dbConnect(SQLite(), "../data/tidy_finance.sqlite",
+  extended_types = TRUE
+)
+
+crsp_monthly <- tbl(tidy_finance, "crsp_monthly") |>
+  select(month, permno, mktcap_lag, ret_excess) |>
+  collect()
+
+macro_predictors <- tbl(tidy_finance, "macro_predictors") |>
+  select(-rp_div) |>
+  collect() |>
+  rename_with(~ paste0("macro_", .), -month)
+
+characteristics <- characteristics |>
+  inner_join(crsp_monthly, by = c("month", "permno")) |>
+  inner_join(macro_predictors, by = "month") |>
+  arrange(permno, month) |>
+  select(permno, month, ret_excess, mktcap_lag, sic2, contains("macro"), contains("characteristic"))
+```
+
+The code below replaces missing values with each stock's cross-sectional median at each month. One of the paper's coauthors also claims [that NA values are set to zero](https://www.dropbox.com/s/4vsc4hakwvz2j31/ML_QandA.pdf?dl=0). 
+```{r}
+replace_nas <- function(x) {
+  x[is.na(x)] <- median(x, na.rm = TRUE)
+  return(x)
+}
+
+characteristics <- characteristics |>
+  group_by(month) |>
+  mutate(across(contains("characteristic"), replace_nas)) |>
+  drop_na(sic2) |>
+  mutate(sic2 = as_factor(sic2))
+```
+
+Finally, for your convenience, I include the pre-processed file into a new file, the `tidy_finance_ML.sqlite` database. You find the document on Absalon and can use it for your research and replication attempts. 
+
+```{r}
+tidy_finance_ML <- dbConnect(SQLite(), "../data/tidy_finance_ML.sqlite",
+  extended_types = TRUE
+)
+
+dbWriteTable(tidy_finance_ML,
+  "stock_characteristics_monthly",
+  value = characteristics |> ungroup(),
+  overwrite = TRUE
+)
+```
